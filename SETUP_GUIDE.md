@@ -41,6 +41,7 @@ Before you begin, ensure you have the following installed on your system:
    npm install --save-dev typescript @types/react @types/react-dom @types/node
    ```
 
+
 ## Configuration
 
 1. **Set Up Environment Variables**
