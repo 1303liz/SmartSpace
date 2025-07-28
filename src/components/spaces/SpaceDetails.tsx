@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
-import Calendar from 'react-calendar';
 import axios from 'axios';
 import { API_BASE_URL } from '../../services/baseUrl';
 

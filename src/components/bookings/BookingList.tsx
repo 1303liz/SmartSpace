@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MessageSquare, Calendar, Clock, Users, MapPin, Star } from 'lucide-react';
+import { MessageSquare, Calendar, Clock, Users, MapPin } from 'lucide-react';
 import { useBookings } from '../../hooks/useBookings';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';

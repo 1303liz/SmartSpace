@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, ArrowLeft, Calendar, Search, Filter, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Plus, ArrowLeft, Search, Filter, ChevronDown } from 'lucide-react';
 import BookingForm from '../components/bookings/BookingForm';
 import BookingList from '../components/bookings/BookingList';
 import { useBookings } from '../hooks/useBookings';
@@ -8,7 +7,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const BookingsPage: React.FC = () => {
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const { myEvents, loading, error, refetch } = useBookings();
+  const { loading, error, refetch } = useBookings();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   

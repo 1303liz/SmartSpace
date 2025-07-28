@@ -16,11 +16,7 @@
     "axios": "^1.4.0",
     "date-fns": "^2.30.0",
     "framer-motion": "^10.12.18",
-<<<<<<< HEAD
     "lucide-react": "^0.525.0",
-=======
-    "lucide-react": "^0.526.0",
->>>>>>> 00f29b5 (Implemented the full functionality of the pages. Everything now works correctly)
     "react": "^18.2.0",
     "react-calendar": "^6.0.0",
     "react-dom": "^18.2.0",
