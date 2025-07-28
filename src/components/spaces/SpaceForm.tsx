@@ -476,7 +476,7 @@ const SpaceForm: React.FC = () => {
                 <div className="mt-4">
                   <button
                     type="button"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
                   >
                     Upload Photos
                   </button>
@@ -498,7 +498,7 @@ const SpaceForm: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

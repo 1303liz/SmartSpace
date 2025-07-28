@@ -10,63 +10,15 @@ import PasswordResetRequestPage from './pages/PasswordResetRequestPage';
 import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage';
 import DashboardPage from './pages/DashboardPage';
 import BookingsPage from './pages/BookingsPage';
+import BookingFormPage from './pages/BookingFormPage';
 import SpacesPage from './pages/SpacesPage';
-import AdminPage from './pages/AdminPage';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import { ToastProvider } from './components/toast/ToastProvider';
 
 function App() {
   return (
    
-      <Router>
-        <HelmetProvider>
-          <AuthProvider>
-            <SidebarProvider>
-              <Routes>
-                {/* Auth Routes - No header, footer, or sidebar */}
-                <Route element={<AuthLayout />}>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                </Route>
-                
-                {/* Main Routes - With header, footer, and sidebar */}
-                <Route element={<MainLayout />}>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute>
-                      <DashboardPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/bookings" element={
-                    <ProtectedRoute>
-                      <BookingsPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/spaces" element={<SpacesPage />} />
-                  <Route path="/spaces/new" element={
-                    <ProtectedRoute>
-                      <SpaceFormPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/spaces/edit/:spaceId" element={
-                    <ProtectedRoute>
-                      <SpaceFormPage />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/spaces/:spaceId" element={<SpacesPage />} />
-                  <Route path="/admin" element={
-                    <ProtectedRoute adminOnly>
-                      <AdminPage />
-                    </ProtectedRoute>
-                  } />
-                </Route>
-              </Routes>
-            </SidebarProvider>
-          </AuthProvider>
-        </HelmetProvider>
-      </Router>
     <Router>
       <HelmetProvider>
         <AuthProvider>
@@ -94,13 +46,13 @@ function App() {
                     <BookingsPage />
                   </ProtectedRoute>
                 } />
-                <Route path="/spaces" element={<SpacesPage />} />
-                <Route path="/spaces/:spaceId" element={<SpacesPage />} />
-                <Route path="/admin" element={
-                  <ProtectedRoute adminOnly>
-                    <AdminPage />
+                <Route path="/bookings/new" element={
+                  <ProtectedRoute>
+                    <BookingFormPage />
                   </ProtectedRoute>
                 } />
+                <Route path="/spaces" element={<SpacesPage />} />
+                <Route path="/spaces/:spaceId" element={<SpacesPage />} />
               </Route>
             </Routes>
           </SidebarProvider>

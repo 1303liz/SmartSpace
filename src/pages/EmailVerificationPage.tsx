@@ -101,8 +101,8 @@ const EmailVerificationPage: React.FC = () => {
   return (
     <div className="max-w-md w-full mx-auto">
       <div className="text-center mb-8">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100">
-          <svg className="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-100">
+          <svg className="h-8 w-8 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
@@ -111,7 +111,7 @@ const EmailVerificationPage: React.FC = () => {
         </h2>
         <p className="mt-2 text-slate-600">
           We've sent a verification code to<br />
-          <span className="font-semibold text-blue-600">{email}</span>
+          <span className="font-semibold text-gray-800">{email}</span>
         </p>
       </div>
 
@@ -153,7 +153,7 @@ const EmailVerificationPage: React.FC = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium flex justify-center items-center"
+          className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-black transition duration-200 font-medium flex justify-center items-center"
         >
           {loading ? (
             <>
@@ -168,7 +168,7 @@ const EmailVerificationPage: React.FC = () => {
 
         <div className="mt-6 text-center">
           <p className="text-slate-600 text-sm">
-            Didn't receive the code? <button type="button" className="text-blue-600 hover:text-blue-800 font-medium">Resend Code</button>
+            Didn't receive the code? <button type="button" className="text-gray-800 hover:text-blue-800 font-medium">Resend Code</button>
           </p>
           <button
             type="button"

@@ -1,11 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { loginUser, logoutUser, type LoginResponse, type LogoutData } from '../services/auth';
 
 interface User {
-  id: number;
   email: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
 }
 
 interface AuthContextType {
@@ -16,8 +15,9 @@ interface AuthContextType {
   error: string | null;
   setUser: (user?: User) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -28,8 +28,9 @@ export const AuthContext = createContext<AuthContextType>({
   error: null,
   setUser: () => {},
   setTokens: () => {},
-  logout: () => {},
+  logout: async () => {},
   isAuthenticated: false,
+  login: async () => {},
 });
 
 interface AuthProviderProps {
@@ -47,18 +48,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     const refresh = localStorage.getItem('refresh_token');
+    const userData = localStorage.getItem('user_data');
     
-    if (token && refresh) {
-      setAccessToken(token);
-      setRefreshToken(refresh);
-      // You would typically fetch user data here with the token
-      // For now, we'll use mock data
-      setUserState({
-        id: 1,
-        email: 'user@example.com',
-        firstName: 'John',
-        lastName: 'Doe'
-      });
+    if (token && refresh && userData) {
+      try {
+        const user = JSON.parse(userData);
+        setAccessToken(token);
+        setRefreshToken(refresh);
+        setUserState(user);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        // Clear invalid data
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_data');
+      }
     }
     setLoading(false);
   }, []);
@@ -66,18 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const setUser = (userData?: User) => {
     if (userData) {
       setUserState(userData);
-    } else {
-      // Fetch user data if no userData provided
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        // Mock user data - in real app, you'd fetch this from API
-        setUserState({
-          id: 1,
-          email: 'user@example.com',
-          firstName: 'John',
-          lastName: 'Doe'
-        });
-      }
+      localStorage.setItem('user_data', JSON.stringify(userData));
     }
   };
 
@@ -88,12 +81,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem('refresh_token', refresh);
   };
 
-  const logout = () => {
-    setUserState(null);
-    setAccessToken(null);
-    setRefreshToken(null);
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+  const login = async (email: string, password: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response: LoginResponse = await loginUser({ email, password });
+      
+      // Set tokens
+      setTokens(response.access_token, response.refresh_token);
+      
+      // Set user data
+      const userData: User = {
+        email: response.email,
+        fullName: response.full_name,
+      };
+      setUser(userData);
+      
+    } catch (error: any) {
+      setError(error.detail || 'Login failed');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      if (refreshToken) {
+        const logoutData: LogoutData = { refresh_token: refreshToken };
+        await logoutUser(logoutData);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Continue with local logout even if API call fails
+    } finally {
+      // Clear local state
+      setUserState(null);
+      setAccessToken(null);
+      setRefreshToken(null);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_data');
+    }
   };
 
   const isAuthenticated = !!accessToken && !!user;
@@ -108,6 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser,
       setTokens,
       logout,
+      login,
       isAuthenticated,
     }}>
       {children}

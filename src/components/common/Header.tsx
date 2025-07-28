@@ -8,45 +8,60 @@ const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force local logout even if API call fails
+      navigate('/');
+    }
   };
 
   return (
-    <header className="bg-white shadow-md border-b sticky top-0 z-30">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
+    <header className="bg-white/95 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
           {/* Left section with menu button and logo */}
           <div className="flex items-center">
             <button
               onClick={toggle}
-              className="p-2 hover:bg-gray-100 rounded-lg lg:hidden"
+              className="p-2 hover:bg-slate-100 rounded-xl lg:hidden transition-colors"
               aria-label="Toggle menu"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <Link to="/" className="text-xl font-bold text-blue-600 ml-2 lg:ml-0">
+            <Link to="/" className="text-xl font-bold text-slate-900 ml-2 lg:ml-0 hover:text-slate-700 transition-colors">
               SmartSpace
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6">
-            <Link to="/spaces" className="text-gray-700 hover:text-blue-600 transition-colors">
+          <nav className="hidden lg:flex items-center space-x-8">
+            {isAuthenticated && (
+              <Link 
+                to="/dashboard" 
+                className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
+              >
+                Dashboard
+              </Link>
+            )}
+            <Link 
+              to="/spaces" 
+              className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
+            >
               Spaces
             </Link>
             {isAuthenticated && (
-              <>
-                <Link to="/bookings" className="text-gray-700 hover:text-blue-600 transition-colors">
-                  My Bookings
-                </Link>
-                <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 transition-colors">
-                  Dashboard
-                </Link>
-              </>
+              <Link 
+                to="/bookings" 
+                className="text-slate-600 hover:text-slate-900 transition-colors font-medium"
+              >
+                My Bookings
+              </Link>
             )}
           </nav>
 
@@ -54,29 +69,29 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-gray-600 hidden sm:inline">
-                  Welcome back{user?.firstName ? `, ${user.firstName}` : ''}!
+                <span className="text-sm text-slate-600 hidden sm:inline font-medium">
+                  {user?.fullName || user?.email}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                  className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors"
                 >
-                  Logout
+                  Sign Out
                 </button>
               </>
             ) : (
               <>
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-blue-600 transition-colors text-sm font-medium"
+                  className="text-slate-600 hover:text-slate-900 transition-colors text-sm font-medium"
                 >
-                  Login
+                  Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  className="btn-primary text-sm"
                 >
-                  Sign Up
+                  Get Started
                 </Link>
               </>
             )}

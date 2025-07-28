@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import SpacesComponent from '../components/spaces/spaces';
+import SpacesList from '../components/spaces/SpaceList';
 import SpaceDetails from '../components/spaces/SpaceDetails';
 import { Helmet } from 'react-helmet-async';
 
@@ -20,8 +20,8 @@ const SpacesPage: React.FC = () => {
         />
       </Helmet>
       
-      <main className="bg-gray-50 min-h-screen">
-        {spaceId ? <SpaceDetails /> : <SpacesComponent />}
+      <main className="min-h-screen bg-slate-50">
+        {spaceId ? <SpaceDetails /> : <SpacesList />}
       </main>
     </>
   );
