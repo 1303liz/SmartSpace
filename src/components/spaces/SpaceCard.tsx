@@ -115,9 +115,17 @@ const SpaceCard: React.FC<SpaceCardProps> = ({ space }) => {
 
           {/* Price */}
           <div className="flex items-center justify-between">
-            <div>
-              <span className="text-2xl font-bold text-slate-900">${space.price_per_hour}</span>
-              <span className="text-slate-600 text-sm">/hour</span>
+            <div className="flex flex-col">
+              <div>
+                <span className="text-2xl font-bold text-slate-900">${space.price_per_hour}</span>
+                <span className="text-slate-600 text-sm">/hour</span>
+              </div>
+              {space.price_per_day && (
+                <div className="text-sm text-slate-700">
+                  <span className="font-medium">${space.price_per_day}</span>
+                  <span className="text-slate-600 text-xs">/day</span>
+                </div>
+              )}
             </div>
             <div className="btn-primary text-sm px-4 py-2">
               View Details

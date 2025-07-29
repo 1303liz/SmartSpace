@@ -39,6 +39,8 @@ interface Space {
   name: string;
   capacity: number;
   description: string;
+  price_per_hour: number;  // Hourly rate
+  price_per_day: number;   // Daily rate for full-day bookings
   equipment: string[];     // ['projector', 'whiteboard', etc.]
   features: string[];      // ['wifi', 'ac', 'parking', etc.]
   isActive: boolean;
@@ -50,13 +52,16 @@ interface Space {
 ### Booking Model
 ```typescript
 type BookingStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
-type EventType = 'internal' | 'external';
+type EventType = 'meeting' | 'conference' | 'webinar' | 'workshop';
 
 interface Booking {
   id: string;              // UUID
   eventName: string;
-  startDateTime: Date;
-  endDateTime: Date;
+  startDateTime: Date;     // Full datetime
+  endDateTime: Date;       // Full datetime
+  startDate: string;       // YYYY-MM-DD
+  endDate: string;         // YYYY-MM-DD
+  isFullDay: boolean;      // Whether this is a full day event
   organizerName: string;
   organizerEmail: string;
   eventType: EventType;

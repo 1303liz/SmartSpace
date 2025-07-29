@@ -7,6 +7,8 @@ export interface Space {
     updatedAt: Date;
     ownerId: string;
     membersCount?: number; // Optional, as it may not always be provided
+    price_per_hour?: number; // Hourly rate
+    price_per_day?: number; // Daily rate for full-day bookings
     }
 
 export interface SpaceImages {

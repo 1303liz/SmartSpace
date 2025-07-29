@@ -7,9 +7,11 @@ import { useBookings } from '../../hooks/useBookings';
 interface BookingFormData {
   eventName: string;
   spaceId: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   startTime: string;
   endTime: string;
+  isFullDay: boolean;
   attendees: number;
   organizerName: string;
   organizerEmail: string;
@@ -19,13 +21,32 @@ interface BookingFormData {
 const initialFormState: BookingFormData = {
   eventName: '',
   spaceId: '',
-  date: '',
+  startDate: '',
+  endDate: '',
   startTime: '',
   endTime: '',
+  isFullDay: false,
   attendees: 1,
   organizerName: '',
   organizerEmail: '',
   eventType: 'meeting',
+};
+
+const calculateDuration = (startTime: string, endTime: string): string => {
+  const start = new Date(`2000-01-01T${startTime}`);
+  const end = new Date(`2000-01-01T${endTime}`);
+  const diffInMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+  
+  const hours = Math.floor(diffInMinutes / 60);
+  const minutes = diffInMinutes % 60;
+  
+  if (hours === 0) {
+    return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+  } else if (minutes === 0) {
+    return `${hours} hour${hours !== 1 ? 's' : ''}`;
+  } else {
+    return `${hours} hour${hours !== 1 ? 's' : ''} and ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+  }
 };
 
 const BookingForm: React.FC = () => {
@@ -51,9 +72,10 @@ const BookingForm: React.FC = () => {
     
     if (!form.eventName.trim()) newErrors.eventName = 'Event name is required';
     if (!form.spaceId) newErrors.spaceId = 'Space selection is required';
-    if (!form.date) newErrors.date = 'Date is required';
-    if (!form.startTime) newErrors.startTime = 'Start time is required';
-    if (!form.endTime) newErrors.endTime = 'End time is required';
+    if (!form.startDate) newErrors.startDate = 'Start date is required';
+    if (!form.isFullDay && !form.startTime) newErrors.startTime = 'Start time is required';
+    if (!form.endDate) newErrors.endDate = 'End date is required';
+    if (!form.isFullDay && !form.endTime) newErrors.endTime = 'End time is required';
     if (!form.organizerName.trim()) newErrors.organizerName = 'Organizer name is required';
     if (!form.organizerEmail.trim()) newErrors.organizerEmail = 'Organizer email is required';
     if (form.attendees < 1) newErrors.attendees = 'At least one attendee required';
@@ -65,18 +87,24 @@ const BookingForm: React.FC = () => {
     }
 
     // Validate time logic
-    if (form.startTime && form.endTime && form.startTime >= form.endTime) {
+    if (!form.isFullDay && form.startTime && form.endTime && form.startDate === form.endDate && form.startTime >= form.endTime) {
       newErrors.endTime = 'End time must be after start time';
     }
 
-    // Validate date is not in the past
-    if (form.date) {
-      const selectedDate = new Date(form.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate < today) {
-        newErrors.date = 'Date cannot be in the past';
-      }
+    // Validate dates
+    const startDate = new Date(form.startDate);
+    const endDate = new Date(form.endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Start date not in past
+    if (startDate < today) {
+      newErrors.startDate = 'Start date cannot be in the past';
+    }
+    
+    // End date not before start date
+    if (endDate < startDate) {
+      newErrors.endDate = 'End date cannot be before start date';
     }
 
     // Validate space capacity
@@ -97,10 +125,16 @@ const BookingForm: React.FC = () => {
     if (!validate()) return;
 
     try {
+      const startDateTime = form.isFullDay ? `${form.startDate}T00:00:00` : `${form.startDate}T${form.startTime}:00`;
+      const endDateTime = form.isFullDay ? `${form.endDate}T23:59:59` : `${form.endDate}T${form.endTime}:00`;
+      
       const bookingData = {
         event_name: form.eventName,
-        start_datetime: `${form.date}T${form.startTime}:00`,
-        end_datetime: `${form.date}T${form.endTime}:00`,
+        start_datetime: startDateTime,
+        end_datetime: endDateTime,
+        start_date: form.startDate,
+        end_date: form.endDate,
+        is_full_day: form.isFullDay,
         organizer_name: form.organizerName,
         organizer_email: form.organizerEmail,
         event_type: form.eventType,
@@ -122,7 +156,7 @@ const BookingForm: React.FC = () => {
     }
   };
 
-  const handleInputChange = (field: keyof BookingFormData, value: string | number) => {
+  const handleInputChange = (field: keyof BookingFormData, value: string | number | boolean) => {
     setForm(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -290,69 +324,102 @@ const BookingForm: React.FC = () => {
           <p className="text-sm text-gray-600 mt-1">When would you like to book this space?</p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Date *
-            </label>
+        {/* Full Day Toggle */}
+        <div className="mb-4">
+          <div className="flex items-center">
             <input
-              type="date"
-              value={form.date}
-              onChange={(e) => handleInputChange('date', e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors ${
-                errors.date ? 'border-red-300' : 'border-gray-300'
-              }`}
+              id="isFullDay"
+              type="checkbox"
+              checked={form.isFullDay}
+              onChange={(e) => handleInputChange('isFullDay', e.target.checked)}
+              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            {errors.date && <p className="mt-2 text-sm text-red-600">{errors.date}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Start Time *
+            <label htmlFor="isFullDay" className="ml-2 text-sm font-medium text-gray-700">
+              Full day event
             </label>
-            <input
-              type="time"
-              value={form.startTime}
-              onChange={(e) => handleInputChange('startTime', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors ${
-                errors.startTime ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {errors.startTime && <p className="mt-2 text-sm text-red-600">{errors.startTime}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              End Time *
-            </label>
-            <input
-              type="time"
-              value={form.endTime}
-              onChange={(e) => handleInputChange('endTime', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors ${
-                errors.endTime ? 'border-red-300' : 'border-gray-300'
-              }`}
-            />
-            {errors.endTime && <p className="mt-2 text-sm text-red-600">{errors.endTime}</p>}
           </div>
         </div>
 
-        {form.startTime && form.endTime && form.startTime < form.endTime && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Start Date *
+            </label>
+            <input
+              type="date"
+              value={form.startDate}
+              onChange={(e) => handleInputChange('startDate', e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors ${
+                errors.startDate ? 'border-red-300' : 'border-gray-300'
+              }`}
+            />
+            {errors.startDate && <p className="mt-2 text-sm text-red-600">{errors.startDate}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              End Date *
+            </label>
+            <input
+              type="date"
+              value={form.endDate}
+              onChange={(e) => handleInputChange('endDate', e.target.value)}
+              min={form.startDate || new Date().toISOString().split('T')[0]}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors ${
+                errors.endDate ? 'border-red-300' : 'border-gray-300'
+              }`}
+            />
+            {errors.endDate && <p className="mt-2 text-sm text-red-600">{errors.endDate}</p>}
+          </div>
+        </div>
+
+        {!form.isFullDay && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Start Time *
+              </label>
+              <input
+                type="time"
+                value={form.startTime}
+                onChange={(e) => handleInputChange('startTime', e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors ${
+                  errors.startTime ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.startTime && <p className="mt-2 text-sm text-red-600">{errors.startTime}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                End Time *
+              </label>
+              <input
+                type="time"
+                value={form.endTime}
+                onChange={(e) => handleInputChange('endTime', e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors ${
+                  errors.endTime ? 'border-red-300' : 'border-gray-300'
+                }`}
+              />
+              {errors.endTime && <p className="mt-2 text-sm text-red-600">{errors.endTime}</p>}
+            </div>
+          </div>
+        )}
+
+        {/* Duration Display */}
+        {((form.isFullDay && form.startDate && form.endDate) || 
+          (!form.isFullDay && form.startTime && form.endTime && form.startTime < form.endTime)) && (
           <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
             <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center text-gray-700">
-                <Clock className="w-4 h-4 mr-2" />
-                <span>
-                  Duration: {Math.round(((new Date(`1970-01-01T${form.endTime}:00`) as any) - (new Date(`1970-01-01T${form.startTime}:00`) as any)) / (1000 * 60 * 60) * 100) / 100} hours
-                </span>
-              </div>
-              {selectedSpace && (
-                <div className="text-emerald-700 font-medium">
-                  Est. cost: ${(parseFloat(selectedSpace.price_per_hour) * 
-                    Math.round(((new Date(`1970-01-01T${form.endTime}:00`) as any) - (new Date(`1970-01-01T${form.startTime}:00`) as any)) / (1000 * 60 * 60) * 100) / 100).toFixed(2)}
-                </div>
-              )}
+              <span className="text-emerald-700">
+                {form.isFullDay ? (
+                  <>Your booking: <strong>Full day event</strong></>
+                ) : (
+                  <>Your booking duration: <strong>{calculateDuration(form.startTime, form.endTime)}</strong></>
+                )}
+              </span>
             </div>
           </div>
         )}

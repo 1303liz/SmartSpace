@@ -182,8 +182,8 @@ const SpaceForm: React.FC = () => {
     const spaceData = {
       ...formData,
       capacity: parseInt(formData.capacity),
-      pricePerHour: parseFloat(formData.pricePerHour),
-      fullDayPrice: parseFloat(formData.fullDayPrice)
+      price_per_hour: parseFloat(formData.pricePerHour).toString(),
+      price_per_day: parseFloat(formData.fullDayPrice).toString()
     };
     
     // For a real app, this would be an API call:

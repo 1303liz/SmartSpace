@@ -8,8 +8,14 @@ export interface Event {
     event_name: string;
     start_datetime: string;
     end_datetime: string;
+    start_date: string;
+    end_date: string;
+    is_full_day: boolean;
     organizer_name: string;
+    organizer_email: string;
     status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rejected';
+    event_type: 'meeting' | 'conference' | 'webinar' | 'workshop';
+    attendance: number;
     space: number;
     space_name: string;
 }
@@ -19,6 +25,9 @@ export interface EventList {
     event_name: string;
     start_datetime: string;
     end_datetime: string;
+    start_date: string;
+    end_date: string;
+    is_full_day: boolean;
     status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rejected';
     space_name: string;
 }
@@ -27,6 +36,9 @@ export interface CreateEventData {
     event_name: string;
     start_datetime: string;
     end_datetime: string;
+    start_date: string;
+    end_date: string;
+    is_full_day: boolean;
     organizer_name: string;
     organizer_email: string;
     event_type: 'meeting' | 'conference' | 'webinar' | 'workshop';

@@ -41,6 +41,9 @@ const BookingList: React.FC<BookingListProps> = ({ statusFilter: externalStatusF
     spaceName: b.space_name,
     startDateTime: b.start_datetime,
     endDateTime: b.end_datetime,
+    startDate: b.start_date || '',
+    endDate: b.end_date || '',
+    isFullDay: b.is_full_day || false,
   }));
 
   const filteredBookings = mappedBookings.filter(booking => {

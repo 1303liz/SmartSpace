@@ -6,6 +6,8 @@ export interface Space {
   description?: string;
   amenities?: string[];
   image_url?: string;
+  price_per_hour?: number;
+  price_per_day?: number; // Daily rate for full-day bookings
 }
 
 export interface UseSpacesReturn {

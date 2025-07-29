@@ -17,6 +17,7 @@ export interface Space {
     equipment?: string;
     features?: string;
     price_per_hour: string;
+    price_per_day: string; // Daily rate for full-day bookings
     created_at: string;
     updated_at: string;
 }
@@ -29,6 +30,7 @@ export interface CreateSpaceData {
     equipment?: string;
     features?: string;
     price_per_hour: string;
+    price_per_day?: string; // Daily rate for full-day bookings
 }
 
 // Axios instance with default config

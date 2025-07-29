@@ -13,6 +13,7 @@ type Space = {
   description?: string;
   status: string; // 'free' or other values
   price_per_hour: string;
+  price_per_day?: string; // Daily rate for full-day bookings
   location: string;
   image1?: string;
   image2?: string;
@@ -175,6 +176,12 @@ const SpaceDetails: React.FC = () => {
             <span className="text-2xl font-bold text-gray-800">${parseFloat(space.price_per_hour).toFixed(2)}</span>
             <span className="ml-1 text-gray-600">/hour</span>
           </div>
+          {space.price_per_day && (
+            <div className="flex items-center mt-1">
+              <span className="text-lg font-semibold text-gray-800">${parseFloat(space.price_per_day).toFixed(2)}</span>
+              <span className="ml-1 text-gray-600">/day</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -482,10 +489,16 @@ const SpaceDetails: React.FC = () => {
         <div className="lg:col-span-1">
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 sticky top-6">
             <div className="text-center">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">
                 ${parseFloat(space.price_per_hour).toFixed(2)}
                 <span className="text-base font-normal text-gray-600">/hour</span>
               </h3>
+              {space.price_per_day && (
+                <div className="mb-2">
+                  <span className="text-lg font-semibold text-gray-900">${parseFloat(space.price_per_day).toFixed(2)}</span>
+                  <span className="text-sm font-normal text-gray-600">/day</span>
+                </div>
+              )}
               
               <div className="mb-6">
                 <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-2">
