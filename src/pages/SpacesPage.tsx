@@ -20,7 +20,7 @@ const SpacesPage: React.FC = () => {
         />
       </Helmet>
       
-      <main className="min-h-screen bg-slate-50">
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100">
         {spaceId ? <SpaceDetails /> : <SpacesList />}
       </main>
     </>

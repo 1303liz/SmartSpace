@@ -9,7 +9,7 @@ import './HomePage.css';
 import { getSpaces } from '../services/spaces';
 import type { Space } from '../services/spaces';
 import { API_BASE_URL } from '../services/baseUrl';
-// Helper function to get the full image URL (copied from SpaceCard)
+
 const getImageUrl = (imagePath?: string): string | undefined => {
   if (!imagePath) return undefined;
   if (imagePath.startsWith('http')) return imagePath;
@@ -17,7 +17,6 @@ const getImageUrl = (imagePath?: string): string | undefined => {
   return `${baseImageUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
 };
 
-// Fallback images for spaces that don't have images (copied from SpaceCard)
 import conferenceHall from '../assets/confrece hall.jpg';
 import eventHall from '../assets/event hall.jpg';
 import lab from '../assets/lab.jpg';
@@ -35,11 +34,7 @@ const getSpaceImage = (space: Space) => {
 
 const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth();
-
-  // Hero carousel images from backend spaces
   const [carouselImages, setCarouselImages] = useState<any[]>([]);
-
-  // Featured spaces state
   const [featuredSpaces, setFeaturedSpaces] = useState<Space[]>([]);
   const [spacesLoading, setSpacesLoading] = useState(false);
   const [spacesError, setSpacesError] = useState<string | null>(null);
@@ -50,11 +45,9 @@ const HomePage: React.FC = () => {
       setSpacesError(null);
       try {
         const allSpaces = await getSpaces();
-        // Pick 3 random spaces for featured
         const shuffled = allSpaces.sort(() => 0.5 - Math.random());
         setFeaturedSpaces(shuffled.slice(0, 3));
 
-        // Use up to 5 spaces for hero carousel
         const heroSlides = allSpaces.slice(0, 5).map((space) => ({
           src: getSpaceImage(space),
           alt: space.name,
@@ -72,35 +65,36 @@ const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section with Carousel */}
-      <section className="hero-section relative">
-        {/* Dark overlay with gradient for better text visibility */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-b md:bg-gradient-to-r from-black/75 via-black/60 to-black/40 flex items-center">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 z-10 bg-gradient-to-r from-blue-900/80 to-blue-700/60 flex items-center">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mobile-hero-content max-w-lg md:max-w-2xl mx-auto p-6 md:p-0 rounded-xl md:rounded-none text-center">
+            <div className="max-w-2xl mx-auto p-6 md:p-0 text-center">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white">
-                <span>Find Your</span>
+                <span>Discover Your</span>
                 <br />
-                <span className="text-white">Perfect Space</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-white">
+                  Ideal Workspace
+                </span>
               </h1>
-              <p className="text-base md:text-lg text-white/90 mb-6 leading-relaxed mx-auto max-w-xl">
-                Book professional spaces for meetings, events, and more. 
-                Simple, fast, and reliable.
+              <p className="text-lg text-blue-100 mb-8 leading-relaxed">
+                Premium spaces for meetings, events, and creative work. 
+                Book instantly with our seamless platform.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link 
                   to="/spaces" 
-                  className="btn-primary flex items-center justify-center text-base px-6 py-3 rounded-lg shadow-lg hover:-translate-y-1 transition-all duration-300"
+                  className="bg-white text-blue-800 hover:bg-blue-50 font-medium px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
                 >
                   Browse Spaces
                 </Link>
                 {!isAuthenticated && (
                   <Link 
                     to="/register" 
-                    className="btn-outline flex items-center justify-center text-base px-6 py-3 rounded-lg shadow-lg hover:-translate-y-1 transition-all duration-300"
+                    className="border-2 border-white text-white hover:bg-white/10 font-medium px-6 py-3 rounded-lg transition-all"
                   >
-                    Get Started
+                    Join Now
                   </Link>
                 )}
               </div>
@@ -108,108 +102,119 @@ const HomePage: React.FC = () => {
           </div>
         </div>
         
-        {/* Hero Carousel */}
-        <div className="hero-carousel h-[550px] md:h-[600px] w-full overflow-hidden">
+        <div className="hero-carousel h-[550px] md:h-[600px] w-full">
           <ImageCarousel 
             images={carouselImages} 
             showIndicators={true}
-            className="w-full h-full"
             autoPlay={true}
             interval={7000}
             showThumbs={false}
+            className="w-full h-full object-cover"
           />
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="section">
-        <div className="container mx-auto">
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-6">How It Works</h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Three simple steps to book your perfect space
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-900">
+              How It Works
+            </h2>
+            <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-blue-300 mx-auto mb-6"></div>
+            <p className="text-lg text-blue-800/80 max-w-2xl mx-auto">
+              Simple steps to find and book your perfect space
             </p>
           </div>
           
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-slate-900 transition-colors duration-300">
-                <span className="text-2xl font-bold text-slate-900 group-hover:text-white transition-colors duration-300">1</span>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "1",
+                title: "Explore Spaces",
+                description: "Browse our curated collection of professional venues for every need"
+              },
+              {
+                step: "2",
+                title: "Instant Booking",
+                description: "Real-time availability with immediate confirmation"
+              },
+              {
+                step: "3",
+                title: "Focus on Work",
+                description: "Arrive and concentrate while we handle the logistics"
+              }
+            ].map((feature, index) => (
+              <div key={index} className="bg-gradient-to-b from-blue-50 to-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-400 rounded-xl flex items-center justify-center mb-6 mx-auto text-white text-2xl font-bold">
+                  {feature.step}
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-center text-blue-900">
+                  {feature.title}
+                </h3>
+                <p className="text-blue-800/80 text-center leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-4">Discover Spaces</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Browse our curated collection of professional spaces designed for every need
-              </p>
-            </div>
-            
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-slate-900 transition-colors duration-300">
-                <span className="text-2xl font-bold text-slate-900 group-hover:text-white transition-colors duration-300">2</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Book Instantly</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Real-time availability with instant confirmation for all your booking needs
-              </p>
-            </div>
-            
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-slate-900 transition-colors duration-300">
-                <span className="text-2xl font-bold text-slate-900 group-hover:text-white transition-colors duration-300">3</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">Focus on What Matters</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Show up and focus on your work while we handle all the details
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-
       {/* Featured Spaces Section */}
-      <section className="section bg-slate-50 py-16">
+      <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">Featured Spaces</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Browse our most popular and highly-rated spaces
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-900">
+              Featured Spaces
+            </h2>
+            <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-blue-300 mx-auto mb-6"></div>
+            <p className="text-lg text-blue-800/80 max-w-2xl mx-auto">
+              Our most popular and highly-rated venues
             </p>
           </div>
+
           {spacesLoading ? (
-            <div className="text-center py-10 text-gray-500">Loading featured spaces...</div>
+            <div className="text-center py-10 text-blue-800/60">Loading featured spaces...</div>
           ) : spacesError ? (
             <div className="text-center py-10 text-red-500">{spacesError}</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {featuredSpaces.map((space) => (
-                <div key={space.id} className="space-card bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <div className="aspect-square relative overflow-hidden">
+                <div key={space.id} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all hover:-translate-y-1">
+                  <div className="aspect-video relative overflow-hidden">
                     <img 
                       src={getSpaceImage(space)} 
                       alt={space.name} 
                       className="object-cover w-full h-full"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end">
-                      <div className="p-4 text-white">
-                        <h3 className="font-bold text-lg">{space.name}</h3>
-                        <p className="text-sm opacity-90">{space.price_per_hour ? `Starting at $${space.price_per_hour}/hour` : ''}</p>
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 via-transparent to-transparent flex items-end p-4">
+                      <div>
+                        <h3 className="font-bold text-xl text-white">{space.name}</h3>
+                        <p className="text-blue-200">
+                          {space.price_per_hour ? `$${space.price_per_hour}/hour` : 'Price on request'}
+                        </p>
                       </div>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between text-sm text-slate-600 mb-2">
-                      <span>{space.capacity ? `Up to ${space.capacity} people` : ''}</span>
-                      {space.status === 'free' && (
-                        <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-medium">Available</span>
-                      )}
-                      {space.status === 'booked' && (
-                        <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs font-medium">Booked</span>
+                  <div className="p-5">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm text-blue-800/80">
+                        {space.capacity ? `Capacity: ${space.capacity}` : ''}
+                      </span>
+                      {space.status === 'free' ? (
+                        <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Available</span>
+                      ) : (
+                        <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">Booked</span>
                       )}
                     </div>
-                    <Link to={`/spaces/${space.id}`} className="text-sm font-semibold text-slate-900 hover:text-slate-700 flex items-center">
-                      View Details
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    <Link 
+                      to={`/spaces/${space.id}`} 
+                      className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm"
+                    >
+                      View details
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </Link>
                   </div>
@@ -217,168 +222,108 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           )}
-          <div className="text-center mt-10">
-            <Link to="/spaces" className="inline-flex items-center justify-center bg-slate-800 text-white hover:bg-slate-700 transition-all duration-300 font-medium py-2 px-6 rounded-lg">
+
+          <div className="text-center mt-12">
+            <Link 
+              to="/spaces" 
+              className="inline-block bg-gradient-to-r from-blue-600 to-blue-400 text-white font-medium px-8 py-3 rounded-lg shadow-md hover:shadow-lg hover:from-blue-700 hover:to-blue-500 transition-all"
+            >
               View All Spaces
             </Link>
           </div>
         </div>
       </section>
-      
+
       {/* Stats Section */}
-      <section className="section gradient-bg">
-        <div className="container mx-auto">
+      <section className="py-16 bg-gradient-to-br from-blue-900 to-blue-700 text-white">
+        <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-slate-900 mb-2">500+</div>
-              <div className="text-slate-600 font-medium">Spaces Available</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-slate-900 mb-2">10K+</div>
-              <div className="text-slate-600 font-medium">Happy Customers</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-slate-900 mb-2">50+</div>
-              <div className="text-slate-600 font-medium">Cities Covered</div>
-            </div>
+            {[
+              { value: "500+", label: "Spaces Available" },
+              { value: "10K+", label: "Happy Customers" },
+              { value: "50+", label: "Cities Covered" }
+            ].map((stat, index) => (
+              <div key={index} className="p-6">
+                <div className="text-4xl font-bold mb-2">{stat.value}</div>
+                <div className="text-blue-200 font-medium">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="section py-16 bg-white">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">What Our Users Say</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Don't just take our word for it
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-900">
+              What Our Clients Say
+            </h2>
+            <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-blue-300 mx-auto mb-6"></div>
+            <p className="text-lg text-blue-800/80 max-w-2xl mx-auto">
+              Trusted by professionals across industries
             </p>
           </div>
-          
-          {/* Testimonial Carousel */}
-          <div className="max-w-4xl mx-auto">
-            <div className="testimonials-wrapper bg-slate-50 rounded-xl p-4 md:p-6">
-              <Carousel
-                autoPlay={true}
-                infiniteLoop={true}
-                showThumbs={false}
-                showStatus={false}
-                showIndicators={true}
-                interval={5000}
-                showArrows={true}
-                className="testimonial-carousel"
-              >
-                <div className="px-4 py-8 sm:px-6 sm:py-10 bg-white rounded-lg shadow-sm mx-2 my-4">
-                  <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mr-4">
-                      <span className="text-blue-600 text-lg font-medium">SJ</span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-slate-900">Sarah Johnson</div>
-                      <div className="text-sm text-slate-500">Marketing Director</div>
-                    </div>
-                    <div className="ml-auto">
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-slate-700 leading-relaxed">
-                    "SmartSpace made finding and booking our company event space incredibly easy. 
-                    The whole process took minutes instead of hours! We've been using it for all our events now."
-                  </p>
-                </div>
-                
-                <div className="px-4 py-8 sm:px-6 sm:py-10 bg-white rounded-lg shadow-sm mx-2 my-4">
-                  <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mr-4">
-                      <span className="text-green-600 text-lg font-medium">MC</span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-slate-900">Michael Chen</div>
-                      <div className="text-sm text-slate-500">Event Space Owner</div>
-                    </div>
-                    <div className="ml-auto">
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-slate-700 leading-relaxed">
-                    "As a venue owner, SmartSpace has helped me maximize bookings and 
-                    streamline management. The platform is intuitive and reliable. My bookings have increased by 40%!"
-                  </p>
-                </div>
-                
-                <div className="px-4 py-8 sm:px-6 sm:py-10 bg-white rounded-lg shadow-sm mx-2 my-4">
-                  <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mr-4">
-                      <span className="text-purple-600 text-lg font-medium">AK</span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-slate-900">Aisha Khan</div>
-                      <div className="text-sm text-slate-500">Startup Founder</div>
-                    </div>
-                    <div className="ml-auto">
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-slate-700 leading-relaxed">
-                    "Finding a flexible workspace for my growing team was a challenge until I discovered SmartSpace.
-                    The variety of options and transparent pricing made the decision so much easier."
-                  </p>
-                </div>
-              </Carousel>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="section cta-section py-16 bg-gradient-to-b from-white to-slate-50">
-        <div className="container mx-auto px-4">
-          <div className="w-full max-w-3xl mx-auto bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl shadow-lg px-6 py-12 text-center">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-t-xl"></div>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4">Ready to Get Started?</h2>
-            <p className="text-base sm:text-lg text-slate-300 mb-8 max-w-xl mx-auto">
-              Join thousands of satisfied users who trust <span className="font-semibold text-white">SmartSpace</span> for their space needs
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                to={isAuthenticated ? "/spaces" : "/register"} 
-                className="inline-flex items-center justify-center bg-white text-slate-900 hover:bg-slate-100 transition-all duration-200 font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg hover:-translate-y-0.5"
-              >
-                {isAuthenticated ? "Browse Spaces" : "Get Started Now"}
-              </Link>
-            </div>
-            <div className="mt-8 flex justify-center space-x-10 border-t border-slate-700 pt-8">
-              <div className="text-center">
-                <div className="text-2xl font-bold">500+</div>
-                <div className="text-xs text-slate-400">Spaces</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">10K+</div>
-                <div className="text-xs text-slate-400">Bookings</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">50+</div>
-                <div className="text-xs text-slate-400">Cities</div>
-              </div>
-            </div>
+          <div className="max-w-4xl mx-auto">
+            <Carousel
+              autoPlay={true}
+              infiniteLoop={true}
+              showThumbs={false}
+              showStatus={false}
+              interval={6000}
+              showArrows={true}
+              className="testimonial-carousel"
+            >
+              {[
+                {
+                  initials: "SJ",
+                  name: "Sarah Johnson",
+                  role: "Marketing Director",
+                  quote: "SmartSpace made finding our event venue effortless. We've used it for all our corporate events with perfect results every time.",
+                  color: "bg-blue-100",
+                  textColor: "text-blue-600"
+                },
+                {
+                  initials: "MC",
+                  name: "Michael Chen",
+                  role: "Startup Founder",
+                  quote: "As a growing company, we need flexible workspaces. SmartSpace delivers quality options with transparent pricing.",
+                  color: "bg-blue-100",
+                  textColor: "text-blue-600"
+                },
+                {
+                  initials: "AK",
+                  name: "Aisha Khan",
+                  role: "Event Planner",
+                  quote: "Booking venues used to take days of back-and-forth. Now I can secure spaces instantly through SmartSpace.",
+                  color: "bg-blue-100",
+                  textColor: "text-blue-600"
+                }
+              ].map((testimonial, index) => (
+                <div key={index} className="px-6 py-8 bg-blue-50 rounded-lg mx-2">
+                  <div className="flex items-center mb-6">
+                    <div className={`w-12 h-12 ${testimonial.color} rounded-full flex items-center justify-center mr-4`}>
+                      <span className={`${testimonial.textColor} font-medium`}>{testimonial.initials}</span>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-blue-900">{testimonial.name}</div>
+                      <div className="text-sm text-blue-600/80">{testimonial.role}</div>
+                    </div>
+                    <div className="ml-auto flex text-yellow-400">
+                      {[...Array(5)].map((_, i) => (
+                        <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-blue-800/90 italic">
+                    "{testimonial.quote}"
+                  </p>
+                </div>
+              ))}
+            </Carousel>
           </div>
         </div>
       </section>
