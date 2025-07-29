@@ -16,6 +16,7 @@ export interface LoginData {
 }
 
 export interface LoginResponse {
+    id: number;
     email: string;
     full_name: string;
     access_token: string;

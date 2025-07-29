@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
 import { API_BASE_URL } from '../../services/baseUrl';
+import SpaceReviews from './SpaceReviews';
 
 // Type definitions based on API response
 type Space = {
@@ -462,24 +463,7 @@ const SpaceDetails: React.FC = () => {
 
             {activeTab === 'reviews' && (
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold text-gray-800">Reviews</h3>
-                  <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition text-sm font-medium">
-                    Write a Review
-                  </button>
-                </div>
-                
-                {/* Review system not implemented yet in the API */}
-                <div className="bg-gray-50 rounded-lg p-8 text-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">No reviews yet</h3>
-                  <p className="text-gray-500 mb-4">Be the first to review this space</p>
-                  <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition text-sm font-medium">
-                    Write a Review
-                  </button>
-                </div>
+                {space && <SpaceReviews spaceId={space.id} />}
               </div>
             )}
           </div>

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { loginUser, logoutUser, type LoginResponse, type LogoutData } from '../services/auth';
 
 interface User {
+  id: number;
   email: string;
   fullName: string;
 }
@@ -93,6 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Set user data
       const userData: User = {
+        id: response.id,
         email: response.email,
         fullName: response.full_name,
       };
