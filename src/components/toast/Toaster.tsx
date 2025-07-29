@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 
 type ToasterProps = {
     message: string
-    type?: 'success' | 'error' | 'info' | 'warning'
+    type: 'success' | 'error' | 'info' | 'warning'
     duration?: number // in seconds
 }
 
@@ -30,14 +30,15 @@ const toastVariants = {
   },
 } as const
 
-const Toaster = ({ message, type = "success", duration = 7}: ToasterProps) => {
-    const [showToast, setShowToast] = useState(true)
+const Toaster = ({ message, type = "info", duration = 7}: ToasterProps) => {
+    const [showToast, setShowToast] = useState(false)
     const durationInSecs = duration * 1000
-    const variant = toastVariants[type]
+    const variant = toastVariants[type ?? "info"]
     const Icon = variant.icon // Specified type icon
 
     // Show the notification for the specified seconds
     useEffect(() => {
+        setShowToast(true)
         const timer = setTimeout(() => setShowToast(false), durationInSecs)
         return () => clearTimeout(timer)
     }, [durationInSecs])
@@ -45,7 +46,7 @@ const Toaster = ({ message, type = "success", duration = 7}: ToasterProps) => {
     if (!showToast) return null
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-4 right-4 z-50 animate-fade">
         <div className={`${variant.style} max-w-80 flex items-center gap-3 px-4 py-3 text-white shadow-sm rounded`}>
             <Icon className="min-w-[16px] min-h-[16px]"/>
             <span>{ message }</span>

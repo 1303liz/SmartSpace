@@ -3,6 +3,7 @@ import { registerUser } from '../../services/auth';
 import type { RegisterData } from '../../services/auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth.ts';
+import { toast } from '../toast/toast.ts';
 
 type FormData = {
   first_name: string;
@@ -39,12 +40,14 @@ export default function RegisterForm() {
     // Validation
     if (!formData.first_name || !formData.last_name || !formData.email || 
         !formData.password || !formData.password_confirm) {
-      setError('Please fill in all required fields');
+        toast.error('Please fill in all required fields');
+      // setError('Please fill in all required fields');
       return;
     }
 
     if (formData.password !== formData.password_confirm) {
-      setError('Passwords do not match');
+      toast.error('Passwords do not match');
+      // setError('Passwords do not match');
       return;
     }
 
@@ -62,7 +65,8 @@ export default function RegisterForm() {
           state: { message: result.message }
         });
       } else {
-        setError('Registration failed. Please try again.');
+        toast.error('Registration failed. Please try again.');
+        // setError('Registration failed. Please try again.');
       }
     } catch (err: any) {
       // Extract backend error message (field or detail)

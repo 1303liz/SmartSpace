@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { toast } from '../toast/toast';
 
 type FormData = {
   email: string;
@@ -39,7 +40,7 @@ const LoginForm: React.FC = () => {
 
     // Basic validation
     if (!formData.email || !formData.password) {
-      setError('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -50,10 +51,12 @@ const LoginForm: React.FC = () => {
       
       // Redirect to intended page or dashboard
       const from = location.state?.from?.pathname || '/dashboard';
+      toast.success('Login successful!');
       navigate(from, { replace: true });
       
     } catch (err: any) {
-      setError(err.detail || 'Login failed. Please check your credentials.');
+        toast.error(err.detail || `Please fill in all required fields`)
+      // setError(err.detail || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }

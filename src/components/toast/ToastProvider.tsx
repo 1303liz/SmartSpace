@@ -41,17 +41,29 @@ export const ToastProvider = ({ children }: { children : ReactNode }) => {
   // Make showToast globally accessible via 'window.__toastCtx()
   useEffect(() => {
     if (typeof window !== "undefined") {
-        ;(window as any).__toastCtx = { showToast }
+        (window as any).__toastCtx = { showToast }
     }
-  })
+
+    return () => {
+      if (typeof window !== "undefined") {
+        delete (window as any).__toastCtx
+      }}
+    }, [showToast])
 
   return (
     <ToastContext.Provider value={{ showToast }}>
         {children}
         <div>
-            {toasts.map(toast => (
-                <Toaster key={toast.id} message={toast.message} type={toast.type} duration={toast.duration}/>
-            ))}
+          {toasts
+            .filter(toast => toast.type) // ⬅️ only render toasts with a valid type
+            .map(toast => (
+              <Toaster
+                key={toast.id}
+                message={toast.message}
+                type={toast.type!} // `!` since filter ensures it's defined
+                duration={toast.duration}
+              />
+          ))}
         </div>
     </ToastContext.Provider>
   )

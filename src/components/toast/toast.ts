@@ -1,33 +1,31 @@
-// Global toast object api to wrap the context usage and expose simple functions
+type ToastType = 'success' | 'error' | 'info' | 'warning'
 
-import type { useToast } from "./ToastProvider"
+type ToastContextShape = {
+  showToast: (message: string, type?: ToastType, duration?: number) => void
+}
+
+type GlobalToastCtx = {
+  __toastCtx?: ToastContextShape
+} & typeof globalThis
 
 export const toast = {
-    success: (msg: string, duration?: number) => {
-        if (typeof window !== "undefined") {
-            const ctx = (window as any).__toastCtx as ReturnType<typeof useToast>
-            ctx?.showToast(msg, "success", duration)
-        }
-    },
+  success: (msg: string, duration?: number) => {
+    const ctx = (globalThis as GlobalToastCtx).__toastCtx
+    ctx?.showToast(msg, "success", duration)
+  },
 
-    error: (msg: string, duration?: number) => {
-        if (typeof window !== "undefined") {
-            const ctx = (window as any).__toastCtx as ReturnType<typeof useToast>
-            ctx?.showToast(msg, "error", duration)
-        }
-    },
+  error: (msg: string, duration?: number) => {
+    const ctx = (globalThis as GlobalToastCtx).__toastCtx
+    ctx?.showToast(msg, "error", duration)
+  },
 
-    info: (msg: string, duration?: number) => {
-        if (typeof window !== "undefined") {
-            const ctx = (window as any).__toastCtx as ReturnType<typeof useToast>
-            ctx?.showToast(msg, "info", duration)
-        }
-    },
+  info: (msg: string, duration?: number) => {
+    const ctx = (globalThis as GlobalToastCtx).__toastCtx
+    ctx?.showToast(msg, "info", duration)
+  },
 
-    warning: (msg: string, duration?: number) => {
-        if (typeof window !== "undefined") {
-            const ctx = (window as any).__toastCtx as ReturnType<typeof useToast>
-            ctx?.showToast(msg, "warning", duration)
-        }
-    },
+  warning: (msg: string, duration?: number) => {
+    const ctx = (globalThis as GlobalToastCtx).__toastCtx
+    ctx?.showToast(msg, "warning", duration)
+  },
 }
