@@ -1,287 +1,132 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Plus, ArrowLeft, Search, Filter, ChevronDown } from 'lucide-react';
 import BookingForm from '../components/bookings/BookingForm';
+import BookingList from '../components/bookings/BookingList';
+import { useBookings } from '../hooks/useBookings';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const BookingsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'past' | 'create'>('all');
-
-  // Mock bookings data
-  const mockBookings = [
-    {
-      id: 1,
-      spaceName: 'Conference Room A',
-      spaceImage: '/api/placeholder/300/200',
-      date: '2025-07-25',
-      time: '10:00 AM - 12:00 PM',
-      status: 'confirmed',
-      attendees: 12,
-      purpose: 'Team Meeting',
-      totalCost: 150,
-      createdAt: '2025-07-20'
-    },
-    {
-      id: 2,
-      spaceName: 'Meeting Room B',
-      spaceImage: '/api/placeholder/300/200',
-      date: '2025-07-28',
-      time: '2:00 PM - 4:00 PM',
-      status: 'pending',
-      attendees: 6,
-      purpose: 'Client Presentation',
-      totalCost: 80,
-      createdAt: '2025-07-21'
-    },
-    {
-      id: 3,
-      spaceName: 'Training Lab',
-      spaceImage: '/api/placeholder/300/200',
-      date: '2025-07-30',
-      time: '9:00 AM - 5:00 PM',
-      status: 'confirmed',
-      attendees: 25,
-      purpose: 'Workshop',
-      totalCost: 800,
-      createdAt: '2025-07-19'
-    },
-    {
-      id: 4,
-      spaceName: 'Event Hall',
-      spaceImage: '/api/placeholder/300/200',
-      date: '2025-07-15',
-      time: '6:00 PM - 11:00 PM',
-      status: 'completed',
-      attendees: 150,
-      purpose: 'Company Party',
-      totalCost: 1250,
-      createdAt: '2025-07-10'
-    },
-    {
-      id: 5,
-      spaceName: 'Conference Room B',
-      spaceImage: '/api/placeholder/300/200',
-      date: '2025-07-18',
-      time: '1:00 PM - 3:00 PM',
-      status: 'cancelled',
-      attendees: 8,
-      purpose: 'Strategy Planning',
-      totalCost: 100,
-      createdAt: '2025-07-15'
-    }
-  ];
-
-  const today = new Date();
-  const upcomingBookings = mockBookings.filter(booking => 
-    new Date(booking.date) >= today && booking.status !== 'cancelled'
-  );
-  const pastBookings = mockBookings.filter(booking => 
-    new Date(booking.date) < today || booking.status === 'completed' || booking.status === 'cancelled'
-  );
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      case 'completed':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const handleCancelBooking = (bookingId: number) => {
-    // In a real app, this would make an API call
-    console.log('Cancelling booking:', bookingId);
-  };
-
-  const renderBookingCard = (booking: any) => (
-    <div key={booking.id} className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{booking.spaceName}</h3>
-            <p className="text-sm text-gray-500">{booking.purpose}</p>
-          </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <p className="text-sm text-gray-600">Date & Time</p>
-            <p className="font-medium">{booking.date}</p>
-            <p className="text-sm text-gray-500">{booking.time}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600">Attendees</p>
-            <p className="font-medium">{booking.attendees} people</p>
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-sm text-gray-600">Total Cost</p>
-            <p className="font-semibold text-lg text-green-600">${booking.totalCost}</p>
-          </div>
-          <div className="flex space-x-2">
-            {booking.status === 'pending' && (
-              <button
-                onClick={() => handleCancelBooking(booking.id)}
-                className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
-              >
-                Cancel
-              </button>
-            )}
-            <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition">
-              View Details
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const getBookingsToShow = () => {
-    switch (activeTab) {
-      case 'upcoming':
-        return upcomingBookings;
-      case 'past':
-        return pastBookings;
-      case 'all':
-      default:
-        return mockBookings;
-    }
-  };
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const { loading, error, refetch } = useBookings();
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  useEffect(() => {
+    refetch();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
-          <p className="text-gray-600">Manage your space reservations and booking history</p>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              <button
-                onClick={() => setActiveTab('all')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'all'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                All Bookings ({mockBookings.length})
-              </button>
-              <button
-                onClick={() => setActiveTab('upcoming')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'upcoming'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Upcoming ({upcomingBookings.length})
-              </button>
-              <button
-                onClick={() => setActiveTab('past')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'past'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Past ({pastBookings.length})
-              </button>
-              <button
-                onClick={() => setActiveTab('create')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'create'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                New Booking
-              </button>
-            </nav>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === 'create' ? (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-6">Book a New Space</h2>
-            <BookingForm />
-          </div>
-        ) : (
-          <div>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <div className="text-2xl mr-3">📅</div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{mockBookings.length}</p>
-                    <p className="text-sm text-gray-600">Total Bookings</p>
-                  </div>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      {!showBookingForm ? (
+        // Bookings List View
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Page Header */}
+          <div className="mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="mb-4 md:mb-0">
+                <h1 className="text-2xl sm:text-3xl font-bold text-blue-900">My Bookings</h1>
+                <p className="text-blue-700 mt-1">Manage and track all your space bookings</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <div className="text-2xl mr-3">🕐</div>
-                  <div>
-                    <p className="text-2xl font-bold text-blue-600">{upcomingBookings.length}</p>
-                    <p className="text-sm text-gray-600">Upcoming Events</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center">
-                  <div className="text-2xl mr-3">💰</div>
-                  <div>
-                    <p className="text-2xl font-bold text-green-600">
-                      ${mockBookings.reduce((sum, booking) => sum + booking.totalCost, 0)}
-                    </p>
-                    <p className="text-sm text-gray-600">Total Spent</p>
-                  </div>
-                </div>
+              <div>
+                <button
+                  onClick={() => setShowBookingForm(true)}
+                  className="inline-flex items-center px-4 py-2 text-sm md:px-6 md:py-3 md:text-base font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl transition-colors shadow-sm"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Create New Booking
+                </button>
               </div>
             </div>
-
-            {/* Bookings List */}
-            <div className="space-y-6">
-              {getBookingsToShow().length > 0 ? (
-                getBookingsToShow().map(renderBookingCard)
-              ) : (
-                <div className="bg-white rounded-lg shadow p-12 text-center">
-                  <div className="text-6xl mb-4">📅</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No bookings found</h3>
-                  <p className="text-gray-600 mb-6">
-                    {activeTab === 'upcoming' 
-                      ? "You don't have any upcoming bookings."
-                      : activeTab === 'past'
-                      ? "You don't have any past bookings."
-                      : "You haven't made any bookings yet."
-                    }
-                  </p>
-                  <button 
-                    onClick={() => setActiveTab('create')}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    Book Your First Space
-                  </button>
+          </div>
+          
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <LoadingSpinner />
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6 border border-red-200">
+              {error}
+            </div>
+          ) : (
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-blue-100 shadow-sm overflow-hidden">
+              {/* Filters Header */}
+              <div className="border-b border-blue-100 p-4 sm:p-6 bg-blue-50">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Search */}
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-blue-400" />
+                    </div>
+                    <input
+                      type="text"
+                      className="block w-full pl-10 pr-3 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/80"
+                      placeholder="Search by event name or space"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  
+                  {/* Status Filter */}
+                  <div className="sm:w-48">
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Filter className="h-4 w-4 text-blue-400" />
+                      </div>
+                      <select
+                        title="Status Filter"
+                        aria-label="Status Filter"
+                        className="block w-full pl-10 pr-10 py-2 text-base border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/80"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                      >
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <ChevronDown className="h-4 w-4 text-blue-400" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
+              
+              {/* Booking List */}
+              <div className="p-4 sm:p-6">
+                <BookingList statusFilter={statusFilter} searchTerm={searchTerm} />
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        // Booking Form View
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => setShowBookingForm(false)}
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Bookings
+            </button>
+          </div>
+
+          {/* Form Container */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-blue-100">
+            <div className="p-4 sm:p-6 border-b border-blue-100">
+              <h1 className="text-2xl font-bold text-blue-900 mb-2">Create New Booking</h1>
+              <p className="text-blue-700">Fill out the details below to reserve your space.</p>
+            </div>
+            <div className="p-4 sm:p-6">
+              <BookingForm />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

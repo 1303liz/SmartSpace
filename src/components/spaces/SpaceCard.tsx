@@ -1,106 +1,132 @@
-import { useState } from 'react';  
-
-type Space = {
-  id: number;
-  name: string;
-  capacity: number;
-  features: string[];
-  image?: string;
-};
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import type { Space } from '../../services/spaces';
+import conferenceHall from '../../assets/confrece hall.jpg';
+import eventHall from '../../assets/event hall.jpg';
+import lab from '../../assets/lab.jpg';
+import { API_BASE_URL } from '../../services/baseUrl';
 
 type SpaceCardProps = {
   space: Space;
 };
 
-export default function SpaceCard({ space }: SpaceCardProps) {
-  const [showModal, setShowModal] = useState(false);
+// Helper function to get the full image URL
+const getImageUrl = (imagePath?: string): string | undefined => {
+  if (!imagePath) return undefined;
+  if (imagePath.startsWith('http')) return imagePath;
+  // Remove '/api' from URL and use base domain for images
+  const baseImageUrl = API_BASE_URL.replace('/api', '');
+  // Make sure we're using consistent base URL format
+  return `${baseImageUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+};
+
+// Fallback images for spaces that don't have images
+const getSpaceImage = (space: Space) => {
+  if (space.image1) return getImageUrl(space.image1);
+  if (space.image2) return getImageUrl(space.image2);
+  if (space.image3) return getImageUrl(space.image3);
+  if (space.image4) return getImageUrl(space.image4);
+  if (space.image5) return getImageUrl(space.image5);
+  
+  // Fallback based on capacity
+  if (space.capacity > 100) return eventHall;
+  if (space.capacity > 30) return conferenceHall;
+  return lab;
+};
+
+const SpaceCard: React.FC<SpaceCardProps> = ({ space }) => {
+  const [imageError, setImageError] = useState(false);
+  // Always use getImageUrl for consistent URL formatting
+  const imageUrl = imageError ? getSpaceImage(space) : (getImageUrl(space.image1) || getSpaceImage(space));
+
+  const features = space.features ? space.features.split(',').map(f => f.trim()).filter(Boolean) : [];
+  const equipment = space.equipment ? space.equipment.split(',').map(e => e.trim()).filter(Boolean) : [];
+  const allFeatures = [...features, ...equipment].slice(0, 3); // Show max 3 features
 
   return (
-    <>
-      {/* CARD */}
-      <div
-        className="bg-white rounded-2xl shadow-md overflow-hidden transition-transform transform hover:scale-[1.02] hover:shadow-lg cursor-pointer"
-        onClick={() => setShowModal(true)}
-      >
-        {space.image && (
-          <div className="h-48 overflow-hidden">
-            <img 
-              src={space.image} 
-              alt={space.name} 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-        <div className="p-4">
-          <h3 className="text-xl font-semibold text-gray-800">{space.name}</h3>
-          <p className="text-sm text-gray-500">Capacity: {space.capacity}</p>
-
-          <div className="mt-2">
-            <h4 className="text-sm font-medium text-gray-700">Features:</h4>
-            <ul className="list-disc list-inside text-sm text-gray-600">
-              {space.features.map((feature, idx) => (
-                <li key={idx}>{feature}</li>
-              ))}
-            </ul>
-          </div>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); // prevent card click
-              setShowModal(true);
+    <div className="card group cursor-pointer">
+      <Link to={`/spaces/${space.id}`}>
+        {/* Image */}
+        <div className="relative h-48 mb-4 overflow-hidden rounded-xl">
+          <img 
+            src={imageUrl}
+            alt={space.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              // Try fallback images in sequence if the current image fails
+              console.log("Image error:", imageUrl);
+              const target = e.target as HTMLImageElement;
+              if (!imageError) {
+                setImageError(true);
+                if (space.image2) target.src = getImageUrl(space.image2) || '';
+                else if (space.image3) target.src = getImageUrl(space.image3) || '';
+                else if (space.image4) target.src = getImageUrl(space.image4) || '';
+                else if (space.image5) target.src = getImageUrl(space.image5) || '';
+                else if (space.capacity > 100) target.src = eventHall;
+                else if (space.capacity > 30) target.src = conferenceHall;
+                else target.src = lab;
+              }
             }}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-          >
-            Quick View
-          </button>
+          />
+          <div className="absolute top-3 right-3">
+            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+              space.status === 'free' 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {space.status === 'free' ? 'Available' : 'Booked'}
+            </span>
+          </div>
         </div>
-      </div>
 
-      {/* MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
-          <div className="bg-white rounded-xl w-full max-w-md shadow-xl relative">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-black text-xl z-10 bg-white bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center"
-            >
-              &times;
-            </button>
-            
-            {space.image && (
-              <div className="h-48 w-full overflow-hidden">
-                <img 
-                  src={space.image} 
-                  alt={space.name} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            
-            <div className="p-6">
-              <h2 className="text-2xl font-bold mb-2">{space.name}</h2>
-              <p className="text-gray-600 mb-1">Capacity: {space.capacity}</p>
+        {/* Content */}
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2 group-hover:text-slate-700 transition-colors">
+            {space.name}
+          </h3>
+          
+          <div className="flex items-center text-slate-600 mb-2">
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="text-sm">{space.location}</span>
+          </div>
 
-              <h4 className="text-sm font-semibold mt-3 mb-1">Features:</h4>
-              <ul className="list-disc list-inside text-sm text-gray-700">
-                {space.features.map((feature, idx) => (
-                  <li key={idx}>{feature}</li>
+          <div className="flex items-center text-slate-600 mb-4">
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span className="text-sm">Up to {space.capacity} people</span>
+          </div>
+
+          {/* Features */}
+          {allFeatures.length > 0 && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-2">
+                {allFeatures.map((feature, index) => (
+                  <span key={index} className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded-lg">
+                    {feature}
+                  </span>
                 ))}
-              </ul>
-
-              <div className="mt-6 text-right">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-200 text-sm rounded-md hover:bg-gray-300"
-                >
-                  Close
-                </button>
               </div>
+            </div>
+          )}
+
+          {/* Price */}
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-2xl font-bold text-slate-900">${space.price_per_hour}</span>
+              <span className="text-slate-600 text-sm">/hour</span>
+            </div>
+            <div className="btn-primary text-sm px-4 py-2">
+              View Details
             </div>
           </div>
         </div>
-      )}
-    </>
+      </Link>
+    </div>
   );
-}
+};
 
+export default SpaceCard;

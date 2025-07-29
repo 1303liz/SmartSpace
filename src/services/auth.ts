@@ -96,9 +96,10 @@ export const logoutUser = async (data: LogoutData): Promise<void> => {
 };
 
 // Password reset request
-export const requestPasswordReset = async (data: PasswordResetData): Promise<void> => {
+export const requestPasswordReset = async (data: PasswordResetData): Promise<{ message: string }> => {
     try {
-        await authApi.post('/password-reset/', data);
+        const response = await authApi.post('/password-reset/', data);
+        return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
             throw error.response?.data || { detail: 'Password reset failed' };

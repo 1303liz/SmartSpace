@@ -1,0 +1,1058 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "eventspace-api",
+    "description": "A REST API for an event-space system.",
+    "termsOfService": "https://www.google.com/policies/terms/",
+    "license": {
+      "name": "BSD License"
+    },
+    "version": "v1"
+  },
+  "host": "localhost:8000",
+  "schemes": [
+    "http"
+  ],
+  "basePath": "/",
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "Basic": {
+      "type": "basic"
+    }
+  },
+  "security": [
+    {
+      "Basic": []
+    }
+  ],
+  "paths": {
+    "/api/bookings/approve/{event_id}/": {
+      "post": {
+        "operationId": "api_bookings_approve_create",
+        "summary": "Approve an event",
+        "description": "Change the status of a pending event to confirmed",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "description": "ID of the event to approve",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event approved successfully"
+          },
+          "400": {
+            "description": "Bad request - event already approved or cancelled"
+          },
+          "404": {
+            "description": "Event not found"
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "event_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/api/bookings/book/": {
+      "post": {
+        "operationId": "api_bookings_book_create",
+        "summary": "Book a new event",
+        "description": "Create a new event booking and automatically update space status",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Event"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Event booked successfully",
+            "schema": {
+              "$ref": "#/definitions/Event"
+            }
+          },
+          "400": {
+            "description": "Bad request - validation errors"
+          },
+          "404": {
+            "description": "Space not found"
+          },
+          "409": {
+            "description": "Conflict - space already booked for this time"
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/bookings/check-status/": {
+      "post": {
+        "operationId": "api_bookings_check-status_create",
+        "summary": "Check event status",
+        "description": "Mark completed events and update space status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Events checked and updated"
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/bookings/my-events/": {
+      "get": {
+        "operationId": "api_bookings_my-events_list",
+        "summary": "List my confirmed events",
+        "description": "Get a list of confirmed events created by the current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User confirmed events retrieved successfully",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/EventList"
+              }
+            }
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/bookings/upcoming/": {
+      "get": {
+        "operationId": "api_bookings_upcoming_list",
+        "summary": "List upcoming confirmed events",
+        "description": "Get a list of all upcoming confirmed events ordered by start date (nearest first)",
+        "parameters": [
+          {
+            "name": "event_type",
+            "in": "query",
+            "description": "Filter events by type",
+            "type": "string",
+            "enum": [
+              "meeting",
+              "conference",
+              "webinar",
+              "workshop"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of upcoming confirmed events retrieved successfully",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/EventList"
+              }
+            }
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/spaces/create/": {
+      "post": {
+        "operationId": "api_spaces_create_create",
+        "summary": "Create a new space",
+        "description": "Create a new event space with the provided details",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Space"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Space created successfully",
+            "schema": {
+              "$ref": "#/definitions/Space"
+            }
+          },
+          "400": {
+            "description": "Bad request - validation errors",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "api"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/users/login/": {
+      "post": {
+        "operationId": "api_users_login_create",
+        "summary": "Login user and get JWT tokens",
+        "description": "\nAuthenticates a user with email and password, returning JWT tokens for API access.\n\n**Process:**\n1. Validates user credentials (email and password)\n2. Checks if user account is verified\n3. Generates and returns JWT access and refresh tokens\n4. Returns user information along with tokens\n\n**Requirements:**\n- User must have verified their email address\n- Valid email and password combination\n",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "email",
+                "password"
+              ],
+              "type": "object",
+              "properties": {
+                "email": {
+                  "description": "User email address",
+                  "type": "string",
+                  "format": "email",
+                  "example": "user@example.com"
+                },
+                "password": {
+                  "description": "User password",
+                  "type": "string",
+                  "format": "password",
+                  "example": "securepassword123"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "description": "User email address",
+                  "type": "string",
+                  "format": "email",
+                  "example": "user@example.com"
+                },
+                "full_name": {
+                  "description": "User full name",
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "access_token": {
+                  "description": "JWT access token for API authentication",
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                },
+                "refresh_token": {
+                  "description": "JWT refresh token for obtaining new access tokens",
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "description": "Error message",
+                  "type": "string",
+                  "example": "invalid credentials try again"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Email not verified",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "description": "Error message",
+                  "type": "string",
+                  "example": "email is not verified"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/users/logout/": {
+      "post": {
+        "operationId": "api_users_logout_create",
+        "summary": "Logout user",
+        "description": "\nLogs out an authenticated user by blacklisting their refresh token.\n\n**Process:**\n1. Validates the refresh token\n2. Adds the token to the blacklist\n3. Prevents further use of the token\n\n**Authentication Required:** This endpoint requires a valid JWT access token.\n",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "refresh_token"
+              ],
+              "type": "object",
+              "properties": {
+                "refresh_token": {
+                  "description": "JWT refresh token to blacklist",
+                  "type": "string",
+                  "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully logged out"
+          },
+          "400": {
+            "description": "Invalid refresh token",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "refresh_token": {
+                  "description": "Token validation errors",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "Token is invalid or has expired"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "description": "Error message",
+                  "type": "string",
+                  "example": "Authentication credentials were not provided."
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "parameters": []
+    },
+    "/api/users/password-reset/": {
+      "post": {
+        "operationId": "api_users_password-reset_create",
+        "summary": "Request password reset",
+        "description": "\nInitiates the password reset process by sending a reset link to the user's email.\n\n**Process:**\n1. Validates if the email exists in the system\n2. Generates a secure reset token\n3. Sends password reset link to user's email\n4. Returns success message\n\n**Note:** If the email doesn't exist, no error is returned for security reasons.\n",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "email"
+              ],
+              "type": "object",
+              "properties": {
+                "email": {
+                  "description": "User email address",
+                  "type": "string",
+                  "format": "email",
+                  "example": "user@example.com"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password reset email sent",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "description": "Success message",
+                  "type": "string",
+                  "example": "a link has been sent to your email to reset your password"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation errors",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "description": "Email validation errors",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "Enter a valid email address."
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/users/register/": {
+      "post": {
+        "operationId": "api_users_register_create",
+        "summary": "Register a new user account",
+        "description": "\nCreates a new user account with the provided information.\n\n**Process:**\n1. Validates the provided user data\n2. Creates a new user account (unverified)\n3. Sends an OTP to the user's email for verification\n4. Returns success message with user's first name\n\n**Note:** The user account will be created but marked as unverified until email verification is completed.\n",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "email",
+                "first_name",
+                "last_name",
+                "password",
+                "password_confirm"
+              ],
+              "type": "object",
+              "properties": {
+                "email": {
+                  "description": "User email address (must be unique)",
+                  "type": "string",
+                  "format": "email",
+                  "example": "user@example.com"
+                },
+                "first_name": {
+                  "description": "User first name",
+                  "type": "string",
+                  "example": "John"
+                },
+                "last_name": {
+                  "description": "User last name",
+                  "type": "string",
+                  "example": "Doe"
+                },
+                "password": {
+                  "description": "User password (minimum 6 characters)",
+                  "type": "string",
+                  "format": "password",
+                  "example": "securepassword123"
+                },
+                "password_confirm": {
+                  "description": "Password confirmation (must match password)",
+                  "type": "string",
+                  "format": "password",
+                  "example": "securepassword123"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "description": "Success message with user name and instructions",
+                  "type": "string",
+                  "example": "Hi John thanks for signing up, a passcode has been sent to your email"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation errors",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "description": "Email validation errors",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "user with this email address already exists."
+                  ]
+                },
+                "password": {
+                  "description": "Password validation errors",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "passwords do not match"
+                  ]
+                },
+                "non_field_errors": {
+                  "description": "General validation errors",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "passwords do not match"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/users/set-new-password/": {
+      "patch": {
+        "operationId": "api_users_set-new-password_partial_update",
+        "summary": "Set new password",
+        "description": "\nSets a new password for the user after validating the reset token.\n\n**Process:**\n1. Validates the reset token and user credentials\n2. Ensures password confirmation matches\n3. Updates the user's password\n4. Returns success message\n\n**Note:** The token and uidb64 should be obtained from the password reset confirmation step.\n",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "password",
+                "password_confirm",
+                "uidb64",
+                "token"
+              ],
+              "type": "object",
+              "properties": {
+                "password": {
+                  "description": "New password (minimum 6 characters)",
+                  "type": "string",
+                  "format": "password",
+                  "example": "newsecurepassword123"
+                },
+                "password_confirm": {
+                  "description": "Password confirmation (must match password)",
+                  "type": "string",
+                  "format": "password",
+                  "example": "newsecurepassword123"
+                },
+                "uidb64": {
+                  "description": "Base64 encoded user ID from reset link",
+                  "type": "string",
+                  "example": "MjM"
+                },
+                "token": {
+                  "description": "Password reset token from reset link",
+                  "type": "string",
+                  "example": "abc123-def456-ghi789"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "description": "Success message",
+                  "type": "string",
+                  "example": "password reset successful"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation errors",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "description": "Password validation errors",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "password does not match"
+                  ]
+                },
+                "non_field_errors": {
+                  "description": "General validation errors",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "reset link is invalid or has expired"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "detail": {
+                  "description": "Error message",
+                  "type": "string",
+                  "example": "reset link is invalid or has expired"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "parameters": []
+    },
+    "/api/users/verify-email/": {
+      "post": {
+        "operationId": "api_users_verify-email_create",
+        "summary": "Verify user email with OTP",
+        "description": "\nVerifies a user's email address using the OTP (One-Time Password) sent during registration.\n\n**Process:**\n1. Validates the provided OTP code\n2. Marks the user account as verified\n3. Enables the user to login\n\n**Note:** Each OTP can only be used once and expires after a certain time.\n",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "otp"
+              ],
+              "type": "object",
+              "properties": {
+                "otp": {
+                  "description": "6-digit One-Time Password sent to user email",
+                  "type": "string",
+                  "example": "123456",
+                  "maxLength": 6,
+                  "minLength": 6
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email verified successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "description": "Success message",
+                  "type": "string",
+                  "example": "email account verified successfully"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "User already verified",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "description": "Status message",
+                  "type": "string",
+                  "example": "code is invalid user already exist"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid OTP",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "description": "Error message",
+                  "type": "string",
+                  "example": "passcode not provided"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "parameters": []
+    },
+    "/password-reset-confirm/{uidb64}/{token}/": {
+      "get": {
+        "operationId": "password-reset-confirm_read",
+        "summary": "Confirm password reset token",
+        "description": "\nValidates the password reset token received from the email link.\n\n**Process:**\n1. Decodes the user ID from the URL\n2. Validates the reset token\n3. Returns success if token is valid\n\n**URL Parameters:**\n- uidb64: Base64 encoded user ID\n- token: Password reset token\n",
+        "parameters": [
+          {
+            "name": "uidb64",
+            "in": "path",
+            "description": "Base64 encoded user ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Password reset token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token is valid",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "description": "Success status",
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "description": "Success message",
+                  "type": "string",
+                  "example": "credentials are valid"
+                },
+                "uidb64": {
+                  "description": "Base64 encoded user ID",
+                  "type": "string",
+                  "example": "MjM"
+                },
+                "token": {
+                  "description": "Password reset token",
+                  "type": "string",
+                  "example": "abc123-def456-ghi789"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or expired token",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "description": "Error message",
+                  "type": "string",
+                  "example": "token is invalid or has expired"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "uidb64",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "Event": {
+      "required": [
+        "event_name",
+        "start_datetime",
+        "end_datetime",
+        "organizer_name",
+        "space"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "event_name": {
+          "title": "Event name",
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1
+        },
+        "start_datetime": {
+          "title": "Start datetime",
+          "type": "string",
+          "format": "date-time"
+        },
+        "end_datetime": {
+          "title": "End datetime",
+          "type": "string",
+          "format": "date-time"
+        },
+        "organizer_name": {
+          "title": "Organizer name",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "status": {
+          "title": "Status",
+          "description": "Status of the event",
+          "type": "string",
+          "enum": [
+            "pending",
+            "confirmed",
+            "cancelled",
+            "completed",
+            "rejected"
+          ],
+          "readOnly": true
+        },
+        "space": {
+          "title": "Space",
+          "description": "Space where the event will be held",
+          "type": "integer"
+        },
+        "space_name": {
+          "title": "Space name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        }
+      }
+    },
+    "EventList": {
+      "required": [
+        "event_name",
+        "start_datetime",
+        "end_datetime"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "event_name": {
+          "title": "Event name",
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1
+        },
+        "start_datetime": {
+          "title": "Start datetime",
+          "type": "string",
+          "format": "date-time"
+        },
+        "end_datetime": {
+          "title": "End datetime",
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "title": "Status",
+          "description": "Status of the event",
+          "type": "string",
+          "enum": [
+            "pending",
+            "confirmed",
+            "cancelled",
+            "completed",
+            "rejected"
+          ]
+        },
+        "space_name": {
+          "title": "Space name",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        }
+      }
+    },
+    "Space": {
+      "required": [
+        "name",
+        "location",
+        "capacity",
+        "price_per_hour"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "location": {
+          "title": "Location",
+          "type": "string",
+          "maxLength": 255,
+          "minLength": 1
+        },
+        "capacity": {
+          "title": "Capacity",
+          "type": "integer",
+          "maximum": 9.223372036854776e+18,
+          "minimum": -9.223372036854776e+18
+        },
+        "image1": {
+          "title": "Image1",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "image2": {
+          "title": "Image2",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "image3": {
+          "title": "Image3",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "image4": {
+          "title": "Image4",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "image5": {
+          "title": "Image5",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string",
+          "enum": [
+            "booked",
+            "free"
+          ]
+        },
+        "description": {
+          "title": "Description",
+          "type": "string",
+          "x-nullable": true
+        },
+        "equipment": {
+          "title": "Equipment",
+          "type": "string",
+          "x-nullable": true
+        },
+        "features": {
+          "title": "Features",
+          "type": "string",
+          "x-nullable": true
+        },
+        "price_per_hour": {
+          "title": "Price per hour",
+          "type": "string",
+          "format": "decimal"
+        },
+        "created_at": {
+          "title": "Created at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "Updated at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    }
+  }
+}

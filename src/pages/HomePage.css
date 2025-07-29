@@ -1,0 +1,218 @@
+/* Custom styles for the homepage */
+
+/* Hero section styles */
+.hero-section {
+  position: relative;
+}
+
+.hero-carousel {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title-gradient {
+  background: linear-gradient(to right, #ffffff, #f8fafc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.hero-content {
+  z-index: 10;
+}
+
+.mobile-hero-content {
+  z-index: 20;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  text-align: center;
+}
+
+.hero-text-container {
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .hero-text-container {
+    text-align: center;
+  }
+}
+
+/* Button Styles */
+.btn-primary {
+  background-color: #fff;
+  color: #0f172a;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1.5px solid #fff;
+  color: #fff;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* Carousel Styling */
+.carousel-container {
+  border-radius: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Custom styling for image carousel */
+.image-carousel-container {
+  height: 100%;
+}
+
+.image-carousel-container .carousel,
+.image-carousel-container .carousel .slider-wrapper,
+.image-carousel-container .carousel .slider {
+  height: 100%;
+}
+
+.image-carousel-container .carousel .slide {
+  height: 100%;
+  background-color: #000;
+}
+
+.image-carousel-container .carousel .slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Space cards styling */
+.space-card {
+  transition: all 0.3s ease;
+}
+
+
+.space-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* Make featured space names white */
+.space-card h3 {
+  color: #fff !important;
+}
+
+/* Testimonial carousel styling */
+.testimonials-wrapper {
+  position: relative;
+}
+
+.testimonial-carousel .carousel .control-dots {
+  bottom: -5px;
+}
+
+.testimonial-carousel .carousel .control-dots .dot {
+  width: 8px;
+  height: 8px;
+  background: #cbd5e1;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.testimonial-carousel .carousel .control-dots .dot.selected {
+  background: #334155;
+  opacity: 1;
+}
+
+.testimonial-carousel .carousel .control-arrow {
+  opacity: 0.6;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  height: 36px;
+  width: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.testimonial-carousel .carousel .control-arrow:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.testimonial-carousel .carousel .control-prev {
+  left: -18px;
+}
+
+.testimonial-carousel .carousel .control-next {
+  right: -18px;
+}
+
+/* Section styling */
+
+.section {
+  padding: 3rem 0;
+}
+
+/* Make CTA heading white, but keep 'Featured Spaces' heading black */
+.section h2 {
+  color: #000;
+}
+
+/* Make CTA heading white */
+.cta-section h2 {
+  color: #fff !important;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 5rem 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .hero-carousel {
+    height: 100vh; /* Full height on mobile */
+    max-height: 600px;
+  }
+  
+  .testimonial-carousel .carousel .control-arrow {
+    display: none;
+  }
+  
+  /* Improve mobile hero section */
+  .hero-section .container {
+    padding: 0 16px;
+  }
+  
+  /* Better text contrast on mobile */
+  .hero-section h1 {
+    font-size: 2.25rem; /* Smaller font size for better fit */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .hero-section p {
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    margin-bottom: 1rem;
+  }
+  
+  /* Ensure buttons are more visible on mobile */
+  .btn-primary, .btn-outline {
+    width: 100%; /* Full width buttons on mobile */
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+}

@@ -52,7 +52,7 @@ const PasswordResetRequestPage: React.FC = () => {
           <div className="mt-6">
             <button
               onClick={() => navigate('/login')}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
+              className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-black transition duration-200 font-medium"
             >
               Back to Login
             </button>
@@ -65,8 +65,8 @@ const PasswordResetRequestPage: React.FC = () => {
   return (
     <div className="max-w-md w-full mx-auto">
       <div className="text-center mb-8">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100">
-          <svg className="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-100">
+          <svg className="h-8 w-8 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
@@ -94,7 +94,7 @@ const PasswordResetRequestPage: React.FC = () => {
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
               </svg>
@@ -106,7 +106,7 @@ const PasswordResetRequestPage: React.FC = () => {
               autoComplete="email"
               required
               placeholder="Enter your email"
-              className="w-full pl-10 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -116,7 +116,7 @@ const PasswordResetRequestPage: React.FC = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium flex justify-center items-center"
+          className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-black transition duration-200 font-medium flex justify-center items-center"
         >
           {loading ? (
             <>
@@ -132,7 +132,7 @@ const PasswordResetRequestPage: React.FC = () => {
         <div className="text-center mt-4">
           <button
             type="button"
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium transition"
+            className="text-sm text-gray-600 hover:text-gray-800 font-medium transition"
             onClick={() => navigate('/login')}
           >
             Back to login

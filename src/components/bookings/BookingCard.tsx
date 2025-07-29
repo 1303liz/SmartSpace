@@ -83,7 +83,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
         {onEdit && booking.status !== 'Cancelled' && (
           <button
             onClick={() => onEdit(booking.id)}
-            className="px-3 py-1.5 text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            className="px-3 py-1.5 text-sm font-medium bg-black text-white rounded-md hover:bg-gray-800 transition"
           >
             Edit
           </button>

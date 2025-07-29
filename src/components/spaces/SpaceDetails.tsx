@@ -1,127 +1,108 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import 'react-calendar/dist/Calendar.css';
-import Calendar from 'react-calendar';
-import conferenceHall from '../../assets/confrece hall.jpg';
-import eventHall from '../../assets/event hall.jpg';
-import lab from '../../assets/lab.jpg';
+import axios from 'axios';
+import { API_BASE_URL } from '../../services/baseUrl';
 
-// Mock space data (in a real app, this would come from an API)
-const MOCK_SPACE = {
-  id: 1,
-  name: 'Conference Room A',
-  description: 'A spacious conference room ideal for large meetings and presentations. Features large windows with natural lighting, comfortable seating, and state-of-the-art audiovisual equipment.',
-  location: 'Main Building, 1st Floor',
-  capacity: 50,
-  pricePerHour: 75,
-  fullDayPrice: 500,
-  features: [
-    'Projector',
-    'Videoconferencing',
-    'Whiteboards',
-    'High-speed Wi-Fi',
-    'Natural lighting',
-    'Adjustable climate control',
-    'Ergonomic chairs',
-    'Water service',
-    'Catering available'
-  ],
-  images: [
-    conferenceHall,
-    eventHall,
-    lab
-  ],
-  availability: true,
-  bookedDates: ['2025-07-20', '2025-07-21', '2025-07-25'],
-  bookedSlots: [
-    { date: '2025-07-18', slots: ['09:00-12:00', '15:00-17:00'] },
-    { date: '2025-07-19', slots: ['13:00-18:00'] }
-  ],
-  rating: 4.8,
-  reviewCount: 24
-};
-
+// Type definitions based on API response
 type Space = {
   id: number;
   name: string;
-  description: string;
-  location: string;
   capacity: number;
-  pricePerHour: number;
-  fullDayPrice: number;
-  features: string[];
-  images: string[];
-  availability: boolean;
-  bookedDates: string[];
-  bookedSlots: {
-    date: string;
-    slots: string[];
-  }[];
-  rating: number;
-  reviewCount: number;
+  features: string;
+  description?: string;
+  status: string; // 'free' or other values
+  price_per_hour: string;
+  location: string;
+  image1?: string;
+  image2?: string;
+  image3?: string;
+  image4?: string;
+  image5?: string;
+  equipment?: string;
+  created_at: string;
+  updated_at: string;
+  organizer: number | null;
 };
 
-type BookingTime = {
-  date: Date | null;
-  startTime: string;
-  endTime: string;
+// Helper function to parse features string into array
+const parseFeatures = (featuresString?: string): string[] => {
+  if (!featuresString) return [];
+  return featuresString.split(',').map(feature => feature.trim()).filter(Boolean);
+};
+
+// Helper function to get the image URL
+const getImageUrl = (imagePath?: string): string | undefined => {
+  if (!imagePath) return undefined;
+  if (imagePath.startsWith('http')) return imagePath;
+  // Remove '/api' from URL and use base domain for images
+  const baseImageUrl = API_BASE_URL.replace('/api', '');
+  return `${baseImageUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
 };
 
 const SpaceDetails: React.FC = () => {
   const { spaceId } = useParams<{ spaceId: string }>();
+  const navigate = useNavigate();
   const [space, setSpace] = useState<Space | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'description' | 'features' | 'reviews'>('description');
-  const [bookingTime, setBookingTime] = useState<BookingTime>({
-    date: null,
-    startTime: '09:00',
-    endTime: '10:00'
-  });
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [showImageModal, setShowImageModal] = useState<boolean>(false);
   
-  // Calculate total hours and price
-  const calculateTotalPrice = () => {
-    if (!bookingTime.date || !bookingTime.startTime || !bookingTime.endTime || !space) {
-      return 0;
-    }
-    
-    const start = new Date(`1970-01-01T${bookingTime.startTime}`);
-    const end = new Date(`1970-01-01T${bookingTime.endTime}`);
-    
-    // Calculate difference in hours
-    const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-    
-    return diffHours * space.pricePerHour;
-  };
+  const [error, setError] = useState<string | null>(null);
 
+  const handleBookNow = () => {
+    navigate(`/bookings/new?space=${space?.id}`);
+  };
+  
   useEffect(() => {
-    // Simulate API call to fetch space details
-    setLoading(true);
+    const fetchSpace = async () => {
+      if (!spaceId) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const response = await axios.get(`${API_BASE_URL}/spaces/${spaceId}/`);
+        setSpace(response.data);
+      } catch (error) {
+        console.error("Error fetching space:", error);
+        setError("Failed to load space details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // In a real app, fetch from API:
-    // const fetchSpace = async () => {
-    //   try {
-    //     const response = await fetch(`/api/spaces/${spaceId}`);
-    //     const data = await response.json();
-    //     setSpace(data);
-    //   } catch (error) {
-    //     console.error("Error fetching space:", error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // fetchSpace();
-    
-    // For demo, use mock data
-    setTimeout(() => {
-      setSpace(MOCK_SPACE);
-      setLoading(false);
-    }, 800);
+    fetchSpace();
   }, [spaceId]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border-l-4 border-red-500 p-4 my-6">
+        <div className="flex items-center">
+          <div className="text-red-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-red-700 font-medium">Error loading space</p>
+            <p className="text-sm text-red-600 mt-1">{error}</p>
+          </div>
+        </div>
+        <div className="mt-4">
+          <Link to="/spaces" className="text-red-600 hover:text-red-800 font-medium">
+            &larr; Return to spaces list
+          </Link>
+        </div>
       </div>
     );
   }
@@ -166,50 +147,209 @@ const SpaceDetails: React.FC = () => {
       <div className="flex flex-col lg:flex-row justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">{space.name}</h1>
-          <div className="flex items-center mt-2">
-            <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              <span className="ml-1 text-sm font-medium text-gray-700">{space.rating}</span>
-              <span className="ml-1 text-sm text-gray-500">({space.reviewCount} reviews)</span>
-            </div>
-            <span className="mx-2 text-gray-300">|</span>
-            <div className="flex items-center text-sm text-gray-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="flex flex-row items-center justify-between mt-2 text-xs sm:text-sm md:text-base text-gray-600 w-full">
+            <div className="flex items-center flex-1 min-w-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              {space.location}
+              <span className="truncate">{space.location}</span>
+            </div>
+            <div className="flex items-center flex-1 min-w-0 justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span className="truncate">Capacity: {space.capacity}</span>
+            </div>
+            <div className="flex items-center flex-1 min-w-0 justify-end">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="truncate">Status: {space.status === 'free' ? 'Available' : 'Booked'}</span>
             </div>
           </div>
         </div>
         
         <div className="mt-4 lg:mt-0">
           <div className="flex items-center">
-            <span className="text-2xl font-bold text-gray-800">${space.pricePerHour}</span>
+            <span className="text-2xl font-bold text-gray-800">${parseFloat(space.price_per_hour).toFixed(2)}</span>
             <span className="ml-1 text-gray-600">/hour</span>
           </div>
-          <div className="text-sm text-gray-500 mt-1">${space.fullDayPrice}/full day</div>
         </div>
       </div>
 
       {/* Image Gallery */}
       <div className="mb-8">
-        <div className="grid grid-cols-3 gap-4 h-96">
-          {space.images.map((image, index) => (
-            <div 
-              key={index} 
-              className={`rounded-lg overflow-hidden ${index === 0 ? 'col-span-2 row-span-2' : ''}`}
-            >
-              <img 
-                src={image} 
-                alt={`${space.name} - View ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
+        {(() => {
+          const images = [
+            space.image1, 
+            space.image2, 
+            space.image3, 
+            space.image4, 
+            space.image5
+          ].filter(Boolean).map(img => getImageUrl(img));
+          
+          if (images.length === 0) {
+            return (
+              <div className="h-96 rounded-lg bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-400">No images available</span>
+              </div>
+            );
+          }
+          
+          const nextImage = () => {
+            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+          };
+          
+          const prevImage = () => {
+            setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+          };
+          
+          return (
+            <div className="space-y-4">
+              {/* Main Image */}
+              <div className="relative h-96 rounded-lg overflow-hidden bg-gray-100">
+                <img 
+                  src={images[currentImageIndex]} 
+                  alt={`${space.name} - View ${currentImageIndex + 1}`}
+                  className="w-full h-full object-contain cursor-pointer"
+                  onClick={() => setShowImageModal(true)}
+                />
+                
+                {/* Image Navigation Controls */}
+                {images.length > 1 && (
+                  <>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        prevImage();
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition"
+                      aria-label="Previous image"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        nextImage();
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition"
+                      aria-label="Next image"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+                
+                {/* Image Counter */}
+                <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  {currentImageIndex + 1} / {images.length}
+                </div>
+                
+                {/* Fullscreen Button */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowImageModal(true);
+                  }}
+                  className="absolute top-4 right-4 bg-white/80 hover:bg-white rounded-full p-2 shadow-md transition"
+                  aria-label="View fullscreen"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Thumbnails */}
+              {images.length > 1 && (
+                <div className="flex space-x-2 overflow-x-auto py-2 px-1">
+                  {images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition ${
+                        currentImageIndex === index 
+                          ? 'border-gray-800 opacity-100' 
+                          : 'border-transparent opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <img 
+                        src={image}
+                        alt={`${space.name} thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {/* Fullscreen Modal */}
+              {showImageModal && (
+                <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setShowImageModal(false)}>
+                  <div className="relative max-w-7xl w-full h-full flex flex-col">
+                    {/* Modal Close Button */}
+                    <button 
+                      className="absolute top-4 right-4 z-50 bg-white/10 hover:bg-white/30 rounded-full p-2 text-white transition"
+                      onClick={() => setShowImageModal(false)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                    
+                    {/* Main Modal Image */}
+                    <div className="flex-1 flex items-center justify-center p-4">
+                      <img 
+                        src={images[currentImageIndex]}
+                        alt={`${space.name} - View ${currentImageIndex + 1}`}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+                    
+                    {/* Modal Navigation Controls */}
+                    {images.length > 1 && (
+                      <div className="flex justify-between items-center p-4">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            prevImage();
+                          }}
+                          className="bg-white/10 hover:bg-white/30 rounded-full p-3 text-white transition"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        
+                        <div className="text-white text-lg font-medium">
+                          {currentImageIndex + 1} / {images.length}
+                        </div>
+                        
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            nextImage();
+                          }}
+                          className="bg-white/10 hover:bg-white/30 rounded-full p-3 text-white transition"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -246,7 +386,7 @@ const SpaceDetails: React.FC = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Reviews ({space.reviewCount})
+                Reviews
               </button>
             </nav>
           </div>
@@ -256,34 +396,36 @@ const SpaceDetails: React.FC = () => {
             {activeTab === 'description' && (
               <div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-3">About this space</h3>
-                <p className="text-gray-600 mb-4">{space.description}</p>
+                <p className="text-gray-600 mb-4">{space.description || 'No description available.'}</p>
                 
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 mt-6">
-                  <h4 className="font-medium text-blue-800 mb-2">Space Specifications</h4>
-                  <div className="grid grid-cols-2 gap-y-2">
+                <h4 className="font-medium text-gray-900 mb-2">Space Specifications</h4>
+                <div className="grid grid-cols-2 gap-y-2 bg-gray-50 rounded-lg p-4 border border-gray-200 mt-6">
                     <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                       </svg>
                       <span className="text-gray-700">Capacity: {space.capacity} people</span>
                     </div>
+                    {space.equipment && (
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-gray-700">Equipment: {space.equipment}</span>
+                      </div>
+                    )}
                     <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      <span className="text-gray-700">Room Size: 800 sq ft</span>
-                    </div>
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-gray-700">Status: {space.availability ? 'Available' : 'Booked'}</span>
+                      <span className="text-gray-700">Status: {space.status === 'free' ? 'Available' : 'Booked'}</span>
                     </div>
                     <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-gray-700">Available M-F, 8am-6pm</span>
+                      <span className="text-gray-700">Created: {new Date(space.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -295,7 +437,7 @@ const SpaceDetails: React.FC = () => {
                 <h3 className="text-xl font-semibold text-gray-800 mb-3">Features & Amenities</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                  {space.features.map((feature, index) => (
+                  {parseFeatures(space.features).map((feature, index) => (
                     <div key={index} className="flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -303,6 +445,10 @@ const SpaceDetails: React.FC = () => {
                       <span className="text-gray-700">{feature}</span>
                     </div>
                   ))}
+                  
+                  {parseFeatures(space.features).length === 0 && (
+                    <div className="col-span-2 text-gray-500">No features listed for this space.</div>
+                  )}
                 </div>
               </div>
             )}
@@ -310,81 +456,22 @@ const SpaceDetails: React.FC = () => {
             {activeTab === 'reviews' && (
               <div>
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold text-gray-800">Customer Reviews</h3>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm font-medium">
+                  <h3 className="text-xl font-semibold text-gray-800">Reviews</h3>
+                  <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition text-sm font-medium">
                     Write a Review
                   </button>
                 </div>
                 
-                {/* Sample reviews - in a real app, these would be fetched from an API */}
-                <div className="space-y-6">
-                  <div className="border-b border-gray-200 pb-6">
-                    <div className="flex justify-between">
-                      <div>
-                        <h4 className="font-medium text-gray-800">John D.</h4>
-                        <div className="flex items-center mt-1">
-                          <div className="flex text-yellow-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          </div>
-                          <span className="ml-2 text-sm text-gray-500">June 28, 2025</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-3 text-gray-600">
-                      Excellent space for our team meeting! The AV equipment worked flawlessly and the natural lighting made the 3-hour session much more pleasant.
-                    </p>
-                  </div>
-                  
-                  <div className="border-b border-gray-200 pb-6">
-                    <div className="flex justify-between">
-                      <div>
-                        <h4 className="font-medium text-gray-800">Sarah M.</h4>
-                        <div className="flex items-center mt-1">
-                          <div className="flex text-yellow-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          </div>
-                          <span className="ml-2 text-sm text-gray-500">July 3, 2025</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-3 text-gray-600">
-                      Perfect for our client presentation. The videoconferencing setup allowed us to connect with remote team members seamlessly. Would book again!
-                    </p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                      View all {space.reviewCount} reviews
-                    </button>
-                  </div>
+                {/* Review system not implemented yet in the API */}
+                <div className="bg-gray-50 rounded-lg p-8 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">No reviews yet</h3>
+                  <p className="text-gray-500 mb-4">Be the first to review this space</p>
+                  <button className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition text-sm font-medium">
+                    Write a Review
+                  </button>
                 </div>
               </div>
             )}
@@ -394,100 +481,62 @@ const SpaceDetails: React.FC = () => {
         {/* Booking Panel */}
         <div className="lg:col-span-1">
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 sticky top-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Book this space</h3>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-              <div className="relative">
-                <Calendar
-                  value={bookingTime.date}
-                  onChange={(date) => setBookingTime({...bookingTime, date: date as Date})}
-                  className="border border-gray-300 rounded-md w-full"
-                  tileDisabled={({ date }) => {
-                    // Disable past dates
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    // Disable booked dates
-                    const formatted = date.toISOString().split('T')[0];
-                    return date < today || space.bookedDates.includes(formatted);
-                  }}
-                  tileClassName={({ date }) => {
-                    const formatted = date.toISOString().split('T')[0];
-                    return space.bookedDates.includes(formatted) ? 'text-red-500' : null;
-                  }}
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                <select
-                  value={bookingTime.startTime}
-                  onChange={(e) => setBookingTime({...bookingTime, startTime: e.target.value})}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="09:00">9:00 AM</option>
-                  <option value="10:00">10:00 AM</option>
-                  <option value="11:00">11:00 AM</option>
-                  <option value="12:00">12:00 PM</option>
-                  <option value="13:00">1:00 PM</option>
-                  <option value="14:00">2:00 PM</option>
-                  <option value="15:00">3:00 PM</option>
-                  <option value="16:00">4:00 PM</option>
-                </select>
-              </div>
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                ${parseFloat(space.price_per_hour).toFixed(2)}
+                <span className="text-base font-normal text-gray-600">/hour</span>
+              </h3>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                <select
-                  value={bookingTime.endTime}
-                  onChange={(e) => setBookingTime({...bookingTime, endTime: e.target.value})}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                >
-                  <option value="10:00">10:00 AM</option>
-                  <option value="11:00">11:00 AM</option>
-                  <option value="12:00">12:00 PM</option>
-                  <option value="13:00">1:00 PM</option>
-                  <option value="14:00">2:00 PM</option>
-                  <option value="15:00">3:00 PM</option>
-                  <option value="16:00">4:00 PM</option>
-                  <option value="17:00">5:00 PM</option>
-                </select>
+              <div className="mb-6">
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>{space.location}</span>
+                </div>
+                
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  <span>Up to {space.capacity} people</span>
+                </div>
               </div>
-            </div>
-            
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-600">Price per hour</span>
-                <span className="font-medium">${space.pricePerHour.toFixed(2)}</span>
-              </div>
-              
-              <div className="flex justify-between mb-4">
-                <span className="text-gray-600">Estimated total</span>
-                <span className="font-semibold">${calculateTotalPrice().toFixed(2)}</span>
-              </div>
-              
+
               <button
-                disabled={!bookingTime.date}
-                className={`w-full py-3 px-4 rounded-md font-medium text-white ${
-                  bookingTime.date
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-blue-300 cursor-not-allowed'
-                } transition`}
+                onClick={handleBookNow}
+                className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
               >
-                {bookingTime.date ? 'Book Now' : 'Select a date'}
+                Book Now
               </button>
               
               <p className="text-xs text-gray-500 text-center mt-3">
-                You won't be charged until you confirm your booking.
+                Secure booking process • Instant confirmation
               </p>
+            </div>
+            
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Status</span>
+                  <span className={`font-medium ${space.status === 'free' ? 'text-green-600' : 'text-orange-600'}`}>
+                    {space.status === 'free' ? 'Available' : 'Booked'}
+                  </span>
+                </div>
+                
+                {space.equipment && (
+                  <div className="flex items-start justify-between text-sm">
+                    <span className="text-gray-600">Equipment</span>
+                    <span className="text-gray-900 text-right max-w-32">{space.equipment}</span>
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="mt-6 flex items-center justify-center">
               <span className="text-sm text-gray-500">
-                Need help? <a href="#" className="text-blue-600 hover:text-blue-800">Contact support</a>
+                Need help? <a href="#" className="text-indigo-600 hover:text-indigo-800">Contact support</a>
               </span>
             </div>
           </div>
