@@ -15,9 +15,9 @@ const Footer = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid gap-6 justify-center">
             <div>
-              <h4 className="text-blue-200 font-medium text-sm mb-3">Navigation</h4>
+              <h4 className="text-blue-200 font-medium text-sm mb-3 mt-4 uppercase">Navigation</h4>
               <ul className="space-y-2">
                 <li>
                   <Link to="/" className="text-blue-100 hover:text-white transition-colors text-sm">
@@ -29,9 +29,19 @@ const Footer = () => {
                     Spaces
                   </Link>
                 </li>
+                <li>
+                  <Link to="/dashboard" className="text-blue-100 hover:text-white transition-colors text-sm">
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/bookings" className="text-blue-100 hover:text-white transition-colors text-sm">
+                    Bookings
+                  </Link>
+                </li>
               </ul>
             </div>
-            <div>
+            {/* <div>
               <h4 className="text-blue-200 font-medium text-sm mb-3">Account</h4>
               <ul className="space-y-2">
                 <li>
@@ -45,7 +55,7 @@ const Footer = () => {
                   </Link>
                 </li>
               </ul>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex justify-center space-x-6 pt-4">
@@ -94,7 +104,7 @@ const Footer = () => {
         </div>
 
         {/* Desktop Footer */}
-        <div className="hidden sm:grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="hidden sm:grid grid-cols-1 md:grid-cols-4 gap-32">
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-white">SmartSpace</h3>
             <p className="text-blue-100 text-sm">
@@ -143,24 +153,39 @@ const Footer = () => {
             <h4 className="text-blue-200 font-medium text-sm uppercase tracking-wider">Explore</h4>
             <ul className="space-y-2">
               <li>
+                  <Link to="/" className="text-blue-100 hover:text-white transition-colors text-sm">
+                    Home
+                  </Link>
+                </li>
+              <li>
                 <Link to="/spaces" className="text-blue-100 hover:text-white transition-colors text-sm">
-                  All Spaces
+                  Spaces
                 </Link>
               </li>
               <li>
+                  <Link to="/dashboard" className="text-blue-100 hover:text-white transition-colors text-sm">
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/bookings" className="text-blue-100 hover:text-white transition-colors text-sm">
+                    Bookings
+                  </Link>
+                </li>
+              {/* <li>
                 <Link to="/features" className="text-blue-100 hover:text-white transition-colors text-sm">
                   Features
                 </Link>
-              </li>
-              <li>
+              </li> */}
+              {/* <li>
                 <Link to="/pricing" className="text-blue-100 hover:text-white transition-colors text-sm">
                   Pricing
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h4 className="text-blue-200 font-medium text-sm uppercase tracking-wider">Company</h4>
             <ul className="space-y-2">
               <li>
@@ -179,9 +204,9 @@ const Footer = () => {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
 
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h4 className="text-blue-200 font-medium text-sm uppercase tracking-wider">Support</h4>
             <ul className="space-y-2">
               <li>
@@ -200,7 +225,7 @@ const Footer = () => {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
 
         {/* Bottom Bar - Desktop */}
@@ -210,13 +235,13 @@ const Footer = () => {
               © {currentYear} SmartSpace. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link to="/privacy" className="text-blue-100 hover:text-white transition-colors text-sm">
+              <Link to="#" className="text-blue-100 hover:text-white transition-colors text-sm">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-blue-100 hover:text-white transition-colors text-sm">
+              <Link to="#" className="text-blue-100 hover:text-white transition-colors text-sm">
                 Terms of Service
               </Link>
-              <Link to="/cookies" className="text-blue-100 hover:text-white transition-colors text-sm">
+              <Link to="#" className="text-blue-100 hover:text-white transition-colors text-sm">
                 Cookie Policy
               </Link>
             </div>
