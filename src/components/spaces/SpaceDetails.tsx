@@ -4,14 +4,14 @@ import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
 import { API_BASE_URL } from '../../services/baseUrl';
 
-// Type definitions based on API response
+
 type Space = {
   id: number;
   name: string;
   capacity: number;
   features: string;
   description?: string;
-  status: string; // 'free' or other values
+  status: string;
   price_per_hour: string;
   location: string;
   image1?: string;
