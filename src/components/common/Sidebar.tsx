@@ -1,10 +1,14 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSidebar } from '../../contexts/SidebarContext';
+import { useAuth } from '../../hooks/useAuth';
+
 
 const Sidebar: React.FC = () => {
   const { isOpen, close } = useSidebar();
   const location = useLocation();
+  const { isAuthenticated, logout, user } = useAuth();
 
   if (!isOpen) return null;
 
@@ -135,22 +139,36 @@ const Sidebar: React.FC = () => {
 
           {/* Enhanced Bottom Section */}
           <div className="p-4 border-t border-gray-200 bg-gradient-to-t from-white to-gray-50">
-            <Link
-              to="/login"
-              onClick={close}
-              className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-black to-gray-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:from-gray-800 hover:to-gray-700 transform hover:-translate-y-1"
-            >
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            {!isAuthenticated ? (
+              <Link
+                to="/login"
+                onClick={close}
+                className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-black to-gray-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:from-gray-800 hover:to-gray-700 transform hover:-translate-y-1"
+              >
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                      d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  <span className="font-medium">Login</span>
+                </div>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-                <span className="font-medium">Login</span>
-              </div>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+              </Link>
+            ) : (
+              <button
+                onClick={async () => { await logout(); close(); }}
+                className="flex items-center justify-between w-full px-4 py-3 bg-gradient-to-r from-black to-gray-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:from-gray-800 hover:to-gray-700 transform hover:-translate-y-1"
+              >
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7" />
+                  </svg>
+                  <span className="font-medium">Logout</span>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </aside>
