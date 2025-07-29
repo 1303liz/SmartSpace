@@ -173,8 +173,10 @@ const SpaceDetails: React.FC = () => {
         <div className="mt-4 lg:mt-0">
           <div className="flex items-center">
             <span className="text-2xl font-bold text-gray-800">${parseFloat(space.price_per_hour).toFixed(2)}</span>
+            <span className="text-2xl font-bold text-gray-800">Ksh {space.pricePerHour}</span>
             <span className="ml-1 text-gray-600">/hour</span>
           </div>
+          <div className="text-sm text-gray-500 mt-1">Ksh {space.fullDayPrice}/full day</div>
         </div>
       </div>
 
@@ -502,6 +504,79 @@ const SpaceDetails: React.FC = () => {
                   </svg>
                   <span>Up to {space.capacity} people</span>
                 </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Book this space</h3>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <div className="relative">
+                <Calendar
+                  value={bookingTime.date}
+                  onChange={(date) => setBookingTime({...bookingTime, date: date as Date})}
+                  className="border border-gray-300 rounded-md w-full"
+                  tileDisabled={({ date }) => {
+                    // Disable past dates
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Disable booked dates
+                    const formatted = date.toISOString().split('T')[0];
+                    return date < today || space.bookedDates.includes(formatted);
+                  }}
+                  tileClassName={({ date }) => {
+                    const formatted = date.toISOString().split('T')[0];
+                    return space.bookedDates.includes(formatted) ? 'text-red-500' : null;
+                  }}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                <select
+                  value={bookingTime.startTime}
+                  onChange={(e) => setBookingTime({...bookingTime, startTime: e.target.value})}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                >
+                  <option value="09:00">9:00 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="13:00">1:00 PM</option>
+                  <option value="14:00">2:00 PM</option>
+                  <option value="15:00">3:00 PM</option>
+                  <option value="16:00">4:00 PM</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                <select
+                  value={bookingTime.endTime}
+                  onChange={(e) => setBookingTime({...bookingTime, endTime: e.target.value})}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                >
+                  <option value="10:00">10:00 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="13:00">1:00 PM</option>
+                  <option value="14:00">2:00 PM</option>
+                  <option value="15:00">3:00 PM</option>
+                  <option value="16:00">4:00 PM</option>
+                  <option value="17:00">5:00 PM</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-4">
+              <div className="flex justify-between mb-2">
+                <span className="text-gray-600">Price per hour</span>
+                <span className="font-medium">Ksh {space.pricePerHour.toFixed(2)}</span>
+              </div>
+              
+              <div className="flex justify-between mb-4">
+                <span className="text-gray-600">Estimated total</span>
+                <span className="font-semibold">Ksh {calculateTotalPrice().toFixed(2)}</span>
               </div>
 
               <button
@@ -539,6 +614,7 @@ const SpaceDetails: React.FC = () => {
                 Need help? <a href="#" className="text-indigo-600 hover:text-indigo-800">Contact support</a>
               </span>
             </div>
+            {/* Contact support section removed as requested */}
           </div>
         </div>
       </div>
