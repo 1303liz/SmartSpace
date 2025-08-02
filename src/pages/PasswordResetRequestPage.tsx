@@ -106,7 +106,7 @@ const PasswordResetRequestPage: React.FC = () => {
               autoComplete="email"
               required
               placeholder="Enter your email"
-              className="w-full pl-10 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+              className="w-full pl-10 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -116,7 +116,7 @@ const PasswordResetRequestPage: React.FC = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-black transition duration-200 font-medium flex justify-center items-center"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium flex justify-center items-center"
         >
           {loading ? (
             <>
@@ -132,7 +132,7 @@ const PasswordResetRequestPage: React.FC = () => {
         <div className="text-center mt-4">
           <button
             type="button"
-            className="text-sm text-gray-600 hover:text-gray-800 font-medium transition"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium transition"
             onClick={() => navigate('/login')}
           >
             Back to login

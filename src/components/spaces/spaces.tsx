@@ -11,7 +11,7 @@ type Space = {
   features: string;
   description?: string;
   status: string; // 'free' or other values
-  price_per_hour: string;
+  price_per_day: string;
   location: string;
   image1?: string;
   image2?: string;
@@ -95,7 +95,7 @@ const SpacesComponent: React.FC = () => {
     } else if (sortOrder === 'capacity') {
       return b.capacity - a.capacity;
     } else if (sortOrder === 'price') {
-      return parseFloat(a.price_per_hour) - parseFloat(b.price_per_hour);
+      return parseFloat(a.price_per_day) - parseFloat(b.price_per_day);
     }
     return 0;
   });
@@ -413,7 +413,7 @@ const SpacesComponent: React.FC = () => {
                         </div>
                         
                         <div className="text-blue-600 font-semibold">
-                          ${space.price_per_hour}/hr
+                          Ksh{space.price_per_day}/day
                         </div>
                       </div>
 

@@ -192,7 +192,7 @@ const HomePage: React.FC = () => {
                       <div>
                         <h3 className="font-bold text-xl text-white">{space.name}</h3>
                         <p className="text-blue-200">
-                          {space.price_per_hour ? `$${space.price_per_hour}/hour` : 'Price on request'}
+                          {space.price_per_day ? `Ksh${space.price_per_day}/day` : 'Price on request'}
                         </p>
                       </div>
                     </div>

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Calendar, Clock, Users, MapPin, AlertCircle, CheckCircle } from 'lucide-react';
 import { useSpaces } from '../../hooks/useSpaces';
 import { useBookings } from '../../hooks/useBookings';
+import PaymentModal from './PaymentModal';
 
 interface BookingFormData {
   eventName: string;
@@ -32,21 +33,13 @@ const initialFormState: BookingFormData = {
   eventType: 'meeting',
 };
 
-const calculateDuration = (startTime: string, endTime: string): string => {
-  const start = new Date(`2000-01-01T${startTime}`);
-  const end = new Date(`2000-01-01T${endTime}`);
-  const diffInMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+const calculateDuration = (startDate: string, endDate: string): string => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffInDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const days = Math.max(1, diffInDays); // Minimum 1 day
   
-  const hours = Math.floor(diffInMinutes / 60);
-  const minutes = diffInMinutes % 60;
-  
-  if (hours === 0) {
-    return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
-  } else if (minutes === 0) {
-    return `${hours} hour${hours !== 1 ? 's' : ''}`;
-  } else {
-    return `${hours} hour${hours !== 1 ? 's' : ''} and ${minutes} minute${minutes !== 1 ? 's' : ''}`;
-  }
+  return `${days} day${days !== 1 ? 's' : ''}`;
 };
 
 const BookingForm: React.FC = () => {
@@ -58,6 +51,8 @@ const BookingForm: React.FC = () => {
   const [form, setForm] = useState(initialFormState);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [success, setSuccess] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingBookingData, setPendingBookingData] = useState<any>(null);
 
   // Pre-fill form if space is selected via URL params
   useEffect(() => {
@@ -124,35 +119,57 @@ const BookingForm: React.FC = () => {
     
     if (!validate()) return;
 
+    // Calculate total amount
+    const selectedSpace = spaces.find(space => space.id.toString() === form.spaceId);
+    if (!selectedSpace) return;
+
+    // Prepare booking data for payment
+    const startDateTime = form.isFullDay ? `${form.startDate}T00:00:00` : `${form.startDate}T${form.startTime}:00`;
+    const endDateTime = form.isFullDay ? `${form.endDate}T23:59:59` : `${form.endDate}T${form.endTime}:00`;
+    
+    const bookingData = {
+      event_name: form.eventName,
+      start_datetime: startDateTime,
+      end_datetime: endDateTime,
+      start_date: form.startDate,
+      end_date: form.endDate,
+      is_full_day: form.isFullDay,
+      organizer_name: form.organizerName,
+      organizer_email: form.organizerEmail,
+      event_type: form.eventType,
+      attendance: form.attendees,
+      space: parseInt(form.spaceId)
+    };
+
+    // Store booking data and show payment modal
+    setPendingBookingData(bookingData);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = async (paymentData: any) => {
     try {
-      const startDateTime = form.isFullDay ? `${form.startDate}T00:00:00` : `${form.startDate}T${form.startTime}:00`;
-      const endDateTime = form.isFullDay ? `${form.endDate}T23:59:59` : `${form.endDate}T${form.endTime}:00`;
-      
-      const bookingData = {
-        event_name: form.eventName,
-        start_datetime: startDateTime,
-        end_datetime: endDateTime,
-        start_date: form.startDate,
-        end_date: form.endDate,
-        is_full_day: form.isFullDay,
-        organizer_name: form.organizerName,
-        organizer_email: form.organizerEmail,
-        event_type: form.eventType,
-        attendance: form.attendees,
-        space: parseInt(form.spaceId),
+      // Add payment information to booking data
+      const finalBookingData = {
+        ...pendingBookingData,
+        payment_method: paymentData.method,
+        transaction_id: paymentData.transactionId,
+        amount_paid: paymentData.amount
       };
 
-      await createBooking(bookingData);
-      setSuccess('Booking submitted successfully! You will receive a confirmation once approved.');
+      await createBooking(finalBookingData);
+      setShowPaymentModal(false);
+      setSuccess('Booking and payment completed successfully! You will receive a confirmation email.');
       setForm(initialFormState);
       setErrors({});
+      setPendingBookingData(null);
       
       // Navigate to bookings list after success
       setTimeout(() => {
         navigate('/bookings');
       }, 2000);
     } catch (error: any) {
-      setErrors({ submit: error.detail || 'Failed to submit booking. Please try again.' });
+      setShowPaymentModal(false);
+      setErrors({ submit: error.detail || 'Booking failed after payment. Please contact support with your transaction ID: ' + paymentData.transactionId });
     }
   };
 
@@ -304,7 +321,7 @@ const BookingForm: React.FC = () => {
                       <span>Up to {selectedSpace.capacity} people</span>
                     </div>
                     <div className="text-emerald-600 font-medium">
-                      ${selectedSpace.price_per_hour}/hour
+                      Ksh{selectedSpace.price_per_day}/day
                     </div>
                   </div>
                 </div>
@@ -409,17 +426,17 @@ const BookingForm: React.FC = () => {
         )}
 
         {/* Duration Display */}
-        {((form.isFullDay && form.startDate && form.endDate) || 
-          (!form.isFullDay && form.startTime && form.endTime && form.startTime < form.endTime)) && (
+        {form.startDate && form.endDate && (
           <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
             <div className="flex items-center justify-between text-sm">
               <span className="text-emerald-700">
-                {form.isFullDay ? (
-                  <>Your booking: <strong>Full day event</strong></>
-                ) : (
-                  <>Your booking duration: <strong>{calculateDuration(form.startTime, form.endTime)}</strong></>
-                )}
+                <>Your booking duration: <strong>{calculateDuration(form.startDate, form.endDate)}</strong></>
               </span>
+              {selectedSpace && (
+                <span className="text-emerald-800 font-medium">
+                  Total: Ksh{(parseFloat(selectedSpace.price_per_day) * Math.max(1, Math.ceil((new Date(form.endDate).getTime() - new Date(form.startDate).getTime()) / (1000 * 60 * 60 * 24)))).toFixed(0)}
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -480,16 +497,31 @@ const BookingForm: React.FC = () => {
           {bookingLoading ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              Submitting...
+              Processing...
             </>
           ) : (
             <>
               <Calendar className="w-5 h-5" />
-              Submit Booking
+              Continue to Payment
             </>
           )}
         </button>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedSpace && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onPaymentSuccess={handlePaymentSuccess}
+          bookingData={{
+            totalAmount: parseFloat(selectedSpace.price_per_day) * Math.max(1, Math.ceil((new Date(form.endDate).getTime() - new Date(form.startDate).getTime()) / (1000 * 60 * 60 * 24))),
+            duration: calculateDuration(form.startDate, form.endDate),
+            spaceName: selectedSpace.name,
+            organizerName: form.organizerName
+          }}
+        />
+      )}
     </form>
   );
 };

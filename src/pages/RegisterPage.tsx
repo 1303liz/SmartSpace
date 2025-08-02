@@ -8,7 +8,7 @@ const RegisterPage: React.FC = () => {
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-slate-800">Join SmartSpace</h1>
         <p className="text-slate-600 mt-2">Create your account to get started</p>
-        <div className="mt-4 w-16 h-1 bg-gray-900 mx-auto rounded-full"></div>
+        <div className="mt-4 w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
       </div>
       
       <RegisterForm />

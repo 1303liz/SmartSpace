@@ -39,7 +39,7 @@ interface Space {
   name: string;
   capacity: number;
   description: string;
-  price_per_hour: number;  // Hourly rate
+  price_per_day: number;  // Daily rate
   price_per_day: number;   // Daily rate for full-day bookings
   equipment: string[];     // ['projector', 'whiteboard', etc.]
   features: string[];      // ['wifi', 'ac', 'parking', etc.]

@@ -12,6 +12,9 @@ import DashboardPage from './pages/DashboardPage';
 import BookingsPage from './pages/BookingsPage';
 import BookingFormPage from './pages/BookingFormPage';
 import SpacesPage from './pages/SpacesPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import CookiePolicyPage from './pages/CookiePolicyPage';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -53,6 +56,11 @@ function App() {
                 } />
                 <Route path="/spaces" element={<SpacesPage />} />
                 <Route path="/spaces/:spaceId" element={<SpacesPage />} />
+                
+                {/* Policy Pages */}
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+                <Route path="/cookie-policy" element={<CookiePolicyPage />} />
               </Route>
             </Routes>
           </SidebarProvider>

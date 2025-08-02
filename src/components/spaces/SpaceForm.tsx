@@ -182,8 +182,7 @@ const SpaceForm: React.FC = () => {
     const spaceData = {
       ...formData,
       capacity: parseInt(formData.capacity),
-      price_per_hour: parseFloat(formData.pricePerHour).toString(),
-      price_per_day: parseFloat(formData.fullDayPrice).toString()
+      price_per_day: parseFloat(formData.pricePerHour).toString(),
     };
     
     // For a real app, this would be an API call:
@@ -335,7 +334,7 @@ const SpaceForm: React.FC = () => {
             {/* Price Per Hour */}
             <div>
               <label htmlFor="pricePerHour" className="block text-sm font-medium text-gray-700 mb-1">
-                Price Per Hour ($)*
+                Price Per Hour (Ksh)*
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -361,7 +360,7 @@ const SpaceForm: React.FC = () => {
             {/* Full Day Price */}
             <div>
               <label htmlFor="fullDayPrice" className="block text-sm font-medium text-gray-700 mb-1">
-                Full Day Price ($)*
+                Full Day Price (Ksh)*
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

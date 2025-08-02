@@ -103,7 +103,7 @@ const LoginForm: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full pl-10 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+              className="w-full pl-10 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -126,7 +126,7 @@ const LoginForm: React.FC = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full pl-10 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
+              className="w-full pl-10 px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -138,13 +138,13 @@ const LoginForm: React.FC = () => {
               name="rememberMe"
               checked={formData.rememberMe}
               onChange={handleChange}
-              className="mr-3 h-4 w-4 rounded border-slate-300 text-gray-600 focus:ring-gray-500"
+              className="mr-3 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm text-slate-600">Remember me</span>
           </label>
           <Link 
             to="/password-reset" 
-            className="text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
           >
             Forgot password?
           </Link>
@@ -152,7 +152,7 @@ const LoginForm: React.FC = () => {
 
         <button
           type="submit"
-          className="w-full bg-gray-800 text-white py-3 rounded-lg hover:bg-black transition duration-200 font-medium flex justify-center items-center mt-6"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium flex justify-center items-center mt-6"
           disabled={loading}
         >
           {loading ? (
@@ -170,7 +170,7 @@ const LoginForm: React.FC = () => {
           Don't have an account?{' '}
           <Link 
             to="/register" 
-            className="font-medium text-gray-800 hover:text-black underline transition-colors"
+            className="font-medium text-blue-600 hover:text-blue-800 underline transition-colors"
           >
             Sign up
           </Link>

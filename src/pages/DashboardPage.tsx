@@ -33,11 +33,12 @@ const DashboardPage: React.FC = () => {
   // Calculate statistics
   const totalBookings = myEventsArray.length;
   const confirmedBookings = myEventsArray.filter(event => event.status === 'confirmed').length;
-  const totalHoursBooked = myEventsArray.reduce((sum, event) => {
+  const totalDaysBooked = myEventsArray.reduce((sum, event) => {
     if (event.status === 'confirmed' || event.status === 'completed') {
       const start = new Date(event.start_datetime);
       const end = new Date(event.end_datetime);
-      return sum + (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      const diffInDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      return sum + Math.max(1, diffInDays); // Minimum 1 day
     }
     return sum;
   }, 0);
@@ -47,8 +48,11 @@ const DashboardPage: React.FC = () => {
     return myEventsArray.reduce((sum, event) => {
       const space = spaces.find(s => s.name === event.space_name);
       if (space && (event.status === 'confirmed' || event.status === 'completed')) {
-        const duration = (new Date(event.end_datetime).getTime() - new Date(event.start_datetime).getTime()) / (1000 * 60 * 60);
-        return sum + (parseFloat(space.price_per_hour) * duration);
+        const start = new Date(event.start_datetime);
+        const end = new Date(event.end_datetime);
+        const diffInDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        const days = Math.max(1, diffInDays); // Minimum 1 day
+        return sum + (parseFloat(space.price_per_day) * days);
       }
       return sum;
     }, 0);
@@ -137,19 +141,19 @@ const DashboardPage: React.FC = () => {
               <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-sky-600" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm font-medium text-blue-600 truncate">Hours Booked</p>
-              <p className="text-lg sm:text-2xl font-bold text-sky-600">{Math.round(totalHoursBooked)}</p>
-              <p className="text-[10px] sm:text-xs text-blue-500 mt-1">Total hours</p>
+              <p className="text-xs sm:text-sm font-medium text-blue-600 truncate">Days Booked</p>
+              <p className="text-lg sm:text-2xl font-bold text-sky-600">{Math.round(totalDaysBooked)}</p>
+              <p className="text-[10px] sm:text-xs text-blue-500 mt-1">Total days</p>
             </div>
           </div>
           {/* Card 4 */}
           <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 px-3 py-4 sm:p-6 flex items-center min-w-0 shadow-sm hover:shadow-md transition-shadow">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-50 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
-              <span className="text-teal-600 font-bold text-base sm:text-lg">$</span>
+              <span className="text-teal-600 font-bold text-base sm:text-lg">Ksh</span>
             </div>
             <div className="min-w-0">
               <p className="text-xs sm:text-sm font-medium text-blue-600 truncate">Total Spent</p>
-              <p className="text-lg sm:text-2xl font-bold text-teal-600">${calculateTotalSpent().toFixed(0)}</p>
+              <p className="text-lg sm:text-2xl font-bold text-teal-600">Ksh{calculateTotalSpent().toFixed(0)}</p>
               <p className="text-[10px] sm:text-xs text-blue-500 mt-1">All time</p>
             </div>
           </div>
